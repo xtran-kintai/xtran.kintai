@@ -96,6 +96,9 @@
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .logout-btn{font-size:12px;padding:4px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:none;color:var(--color-text-secondary);cursor:pointer}
   .logout-btn:hover{background:var(--color-background-secondary)}
+  .user-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+  .user-row:last-child{border-bottom:none}
+  .user-name{flex:1;font-size:14px;color:var(--color-text-primary)}
 </style>
 </head>
 <body>
@@ -125,6 +128,53 @@
     <input type="password" id="setupPass" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="例: 1234"/>
     <button class="btn" onclick="doSetup()" style="margin-top:10px">従業員を追加</button>
     <div id="setupMsg" style="font-size:12px;margin-top:6px;min-height:16px"></div>
+  </div>
+  <div class="card" style="background:var(--color-background-secondary);border:none;margin-top:0">
+    <div style="font-size:13px;font-weight:500;margin-bottom:8px">管理者メニュー</div>
+    <button class="btn" onclick="showScreen('s-admin-login')" style="margin-top:0">管理者としてログイン</button>
+  </div>
+</div>
+
+<div id="s-admin-login" class="screen">
+  <div style="text-align:center;padding:2rem 0 1rem">
+    <div style="font-size:18px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px">管理者ログイン</div>
+    <div style="font-size:13px;color:var(--color-text-secondary)">管理者パスワードを入力してください</div>
+  </div>
+  <div class="card">
+    <label>管理者パスワード（4桁の数字）</label>
+    <input type="password" id="adminPass" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="例: 0000"/>
+    <button class="btn btn-primary" onclick="doAdminLogin()" style="margin-top:14px">ログイン</button>
+    <div id="adminLoginErr" style="font-size:12px;color:var(--color-text-danger);margin-top:8px;min-height:16px"></div>
+    <button class="btn" onclick="showScreen('s-login')" style="margin-top:4px">戻る</button>
+  </div>
+  <div class="card" style="background:var(--color-background-secondary);border:none">
+    <div style="font-size:13px;font-weight:500;margin-bottom:8px">管理者パスワードを設定（初回のみ）</div>
+    <label>新しい管理者パスワード（4桁）</label>
+    <input type="password" id="newAdminPass" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="例: 0000"/>
+    <button class="btn" onclick="setAdminPass()" style="margin-top:10px">パスワードを設定</button>
+    <div id="adminSetupMsg" style="font-size:12px;margin-top:6px;min-height:16px"></div>
+  </div>
+</div>
+
+<div id="s-admin" class="screen">
+  <div class="header-row">
+    <div style="width:40px;height:40px;border-radius:50%;background:#FAEEDA;color:#633806;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:15px;flex-shrink:0">管</div>
+    <div style="flex:1">
+      <div style="font-weight:500;font-size:15px">管理者</div>
+      <div style="font-size:12px;color:var(--color-text-secondary)">管理者モード</div>
+    </div>
+    <button class="logout-btn" onclick="doAdminLogout()">ログアウト</button>
+  </div>
+  <div class="card">
+    <h3 style="margin-bottom:12px">従業員一覧</h3>
+    <div id="adminUserList"><div class="empty">従業員が登録されていません</div></div>
+  </div>
+  <div class="card" style="background:var(--color-background-secondary);border:none">
+    <div style="font-size:13px;font-weight:500;margin-bottom:8px">管理者パスワードを変更</div>
+    <label>新しいパスワード（4桁）</label>
+    <input type="password" id="changeAdminPass" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="例: 0000"/>
+    <button class="btn" onclick="changeAdminPassword()" style="margin-top:10px">パスワードを変更</button>
+    <div id="changeAdminMsg" style="font-size:12px;margin-top:6px;min-height:16px"></div>
   </div>
 </div>
 
@@ -273,7 +323,69 @@ function doSetup(){
   msg.style.color='var(--color-text-success)';msg.textContent=`「${name}」を追加しました`;
   document.getElementById('setupName').value='';
   document.getElementById('setupPass').value='';
+  function getAdminPin(){return localStorage.getItem('kt_admin_pin')||''}
+function saveAdminPin(p){localStorage.setItem('kt_admin_pin',p)}
+
+function setAdminPass(){
+  var pass=document.getElementById('newAdminPass').value.trim();
+  var msg=document.getElementById('adminSetupMsg');
+  if(!/^\d{4}$/.test(pass)){msg.style.color='var(--color-text-danger)';msg.textContent='4桁の数字を入力してください';return}
+  if(getAdminPin()){msg.style.color='var(--color-text-danger)';msg.textContent='既に設定されています。変更は管理者ログイン後に行ってください';return}
+  saveAdminPin(hashPin(pass));
+  msg.style.color='var(--color-text-success)';msg.textContent='管理者パスワードを設定しました';
+  document.getElementById('newAdminPass').value='';
+}
+
+function doAdminLogin(){
+  var pass=document.getElementById('adminPass').value;
+  var err=document.getElementById('adminLoginErr');
+  if(!pass){err.textContent='パスワードを入力してください';return}
+  if(!getAdminPin()){err.textContent='先に管理者パスワードを設定してください';return}
+  if(hashPin(pass)!==getAdminPin()){err.textContent='パスワードが違います';return}
+  document.getElementById('adminPass').value='';
+  err.textContent='';
+  renderAdminUserList();
+  showScreen('s-admin');
+}
+
+function doAdminLogout(){
+  showScreen('s-login');
   populateUserSelect();
+}
+
+function renderAdminUserList(){
+  var users=getUsers();
+  var el=document.getElementById('adminUserList');
+  if(!users.length){el.innerHTML='<div class="empty">従業員が登録されていません</div>';return}
+  el.innerHTML=users.map(function(u){
+    return '<div class="user-row"><div class="user-name">'+u.name+'</div><button class="btn btn-xs btn-danger" onclick="deleteUser(''+u.id+'')">削除</button></div>';
+  }).join('');
+}
+
+function deleteUser(id){
+  var users=getUsers();
+  var user=users.find(function(u){return u.id===id});
+  if(!user)return;
+  if(!confirm('「'+user.name+'」を削除しますか？
+この従業員の打刻データも全て削除されます。'))return;
+  var newUsers=users.filter(function(u){return u.id!==id});
+  saveUsers(newUsers);
+  localStorage.removeItem('kt_rec_'+id);
+  localStorage.removeItem('kt_gs_'+id);
+  renderAdminUserList();
+  populateUserSelect();
+}
+
+function changeAdminPassword(){
+  var pass=document.getElementById('changeAdminPass').value.trim();
+  var msg=document.getElementById('changeAdminMsg');
+  if(!/^\d{4}$/.test(pass)){msg.style.color='var(--color-text-danger)';msg.textContent='4桁の数字を入力してください';return}
+  saveAdminPin(hashPin(pass));
+  msg.style.color='var(--color-text-success)';msg.textContent='パスワードを変更しました';
+  document.getElementById('changeAdminPass').value='';
+}
+
+populateUserSelect();
 }
 
 function doLogin(){
@@ -294,7 +406,69 @@ function doLogin(){
 function doLogout(){
   currentUser=null;
   showScreen('s-login');
+  function getAdminPin(){return localStorage.getItem('kt_admin_pin')||''}
+function saveAdminPin(p){localStorage.setItem('kt_admin_pin',p)}
+
+function setAdminPass(){
+  var pass=document.getElementById('newAdminPass').value.trim();
+  var msg=document.getElementById('adminSetupMsg');
+  if(!/^\d{4}$/.test(pass)){msg.style.color='var(--color-text-danger)';msg.textContent='4桁の数字を入力してください';return}
+  if(getAdminPin()){msg.style.color='var(--color-text-danger)';msg.textContent='既に設定されています。変更は管理者ログイン後に行ってください';return}
+  saveAdminPin(hashPin(pass));
+  msg.style.color='var(--color-text-success)';msg.textContent='管理者パスワードを設定しました';
+  document.getElementById('newAdminPass').value='';
+}
+
+function doAdminLogin(){
+  var pass=document.getElementById('adminPass').value;
+  var err=document.getElementById('adminLoginErr');
+  if(!pass){err.textContent='パスワードを入力してください';return}
+  if(!getAdminPin()){err.textContent='先に管理者パスワードを設定してください';return}
+  if(hashPin(pass)!==getAdminPin()){err.textContent='パスワードが違います';return}
+  document.getElementById('adminPass').value='';
+  err.textContent='';
+  renderAdminUserList();
+  showScreen('s-admin');
+}
+
+function doAdminLogout(){
+  showScreen('s-login');
   populateUserSelect();
+}
+
+function renderAdminUserList(){
+  var users=getUsers();
+  var el=document.getElementById('adminUserList');
+  if(!users.length){el.innerHTML='<div class="empty">従業員が登録されていません</div>';return}
+  el.innerHTML=users.map(function(u){
+    return '<div class="user-row"><div class="user-name">'+u.name+'</div><button class="btn btn-xs btn-danger" onclick="deleteUser(''+u.id+'')">削除</button></div>';
+  }).join('');
+}
+
+function deleteUser(id){
+  var users=getUsers();
+  var user=users.find(function(u){return u.id===id});
+  if(!user)return;
+  if(!confirm('「'+user.name+'」を削除しますか？
+この従業員の打刻データも全て削除されます。'))return;
+  var newUsers=users.filter(function(u){return u.id!==id});
+  saveUsers(newUsers);
+  localStorage.removeItem('kt_rec_'+id);
+  localStorage.removeItem('kt_gs_'+id);
+  renderAdminUserList();
+  populateUserSelect();
+}
+
+function changeAdminPassword(){
+  var pass=document.getElementById('changeAdminPass').value.trim();
+  var msg=document.getElementById('changeAdminMsg');
+  if(!/^\d{4}$/.test(pass)){msg.style.color='var(--color-text-danger)';msg.textContent='4桁の数字を入力してください';return}
+  saveAdminPin(hashPin(pass));
+  msg.style.color='var(--color-text-success)';msg.textContent='パスワードを変更しました';
+  document.getElementById('changeAdminPass').value='';
+}
+
+populateUserSelect();
 }
 
 function showMain(){
@@ -552,6 +726,68 @@ const GS_CODE=`function doPost(e) {
 }`;
 
 document.getElementById('gsCode').value=GS_CODE;
+function getAdminPin(){return localStorage.getItem('kt_admin_pin')||''}
+function saveAdminPin(p){localStorage.setItem('kt_admin_pin',p)}
+
+function setAdminPass(){
+  var pass=document.getElementById('newAdminPass').value.trim();
+  var msg=document.getElementById('adminSetupMsg');
+  if(!/^\d{4}$/.test(pass)){msg.style.color='var(--color-text-danger)';msg.textContent='4桁の数字を入力してください';return}
+  if(getAdminPin()){msg.style.color='var(--color-text-danger)';msg.textContent='既に設定されています。変更は管理者ログイン後に行ってください';return}
+  saveAdminPin(hashPin(pass));
+  msg.style.color='var(--color-text-success)';msg.textContent='管理者パスワードを設定しました';
+  document.getElementById('newAdminPass').value='';
+}
+
+function doAdminLogin(){
+  var pass=document.getElementById('adminPass').value;
+  var err=document.getElementById('adminLoginErr');
+  if(!pass){err.textContent='パスワードを入力してください';return}
+  if(!getAdminPin()){err.textContent='先に管理者パスワードを設定してください';return}
+  if(hashPin(pass)!==getAdminPin()){err.textContent='パスワードが違います';return}
+  document.getElementById('adminPass').value='';
+  err.textContent='';
+  renderAdminUserList();
+  showScreen('s-admin');
+}
+
+function doAdminLogout(){
+  showScreen('s-login');
+  populateUserSelect();
+}
+
+function renderAdminUserList(){
+  var users=getUsers();
+  var el=document.getElementById('adminUserList');
+  if(!users.length){el.innerHTML='<div class="empty">従業員が登録されていません</div>';return}
+  el.innerHTML=users.map(function(u){
+    return '<div class="user-row"><div class="user-name">'+u.name+'</div><button class="btn btn-xs btn-danger" onclick="deleteUser(''+u.id+'')">削除</button></div>';
+  }).join('');
+}
+
+function deleteUser(id){
+  var users=getUsers();
+  var user=users.find(function(u){return u.id===id});
+  if(!user)return;
+  if(!confirm('「'+user.name+'」を削除しますか？
+この従業員の打刻データも全て削除されます。'))return;
+  var newUsers=users.filter(function(u){return u.id!==id});
+  saveUsers(newUsers);
+  localStorage.removeItem('kt_rec_'+id);
+  localStorage.removeItem('kt_gs_'+id);
+  renderAdminUserList();
+  populateUserSelect();
+}
+
+function changeAdminPassword(){
+  var pass=document.getElementById('changeAdminPass').value.trim();
+  var msg=document.getElementById('changeAdminMsg');
+  if(!/^\d{4}$/.test(pass)){msg.style.color='var(--color-text-danger)';msg.textContent='4桁の数字を入力してください';return}
+  saveAdminPin(hashPin(pass));
+  msg.style.color='var(--color-text-success)';msg.textContent='パスワードを変更しました';
+  document.getElementById('changeAdminPass').value='';
+}
+
 populateUserSelect();
 
 if('serviceWorker' in navigator){
