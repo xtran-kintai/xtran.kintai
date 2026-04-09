@@ -1,0 +1,25 @@
+{
+  "name": "出退勤管理",
+  "short_name": "出退勤",
+  "description": "出退勤の打刻・記録管理アプリ",
+  "start_url": "./kintai_multi_user.html",
+  "display": "standalone",
+  "background_color": "#f0f0f0",
+  "theme_color": "#1D9E75",
+  "orientation": "portrait",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

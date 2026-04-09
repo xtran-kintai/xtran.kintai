@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>出退勤管理</title>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="出退勤管理"/>
+<meta name="theme-color" content="#1D9E75"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<style>
+  :root {
+    --color-background-primary: #ffffff;
+    --color-background-secondary: #f5f5f5;
+    --color-background-info: #E6F1FB;
+    --color-background-success: #E1F5EE;
+    --color-background-warning: #FAEEDA;
+    --color-background-danger: #FCEBEB;
+    --color-text-primary: #1a1a1a;
+    --color-text-secondary: #666666;
+    --color-text-info: #185FA5;
+    --color-text-success: #0F6E56;
+    --color-text-warning: #633806;
+    --color-text-danger: #A32D2D;
+    --color-border-tertiary: rgba(0,0,0,0.12);
+    --color-border-secondary: rgba(0,0,0,0.22);
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+    --font-mono: 'SF Mono', 'Menlo', 'Consolas', monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-background-primary: #1e1e1e;
+      --color-background-secondary: #2a2a2a;
+      --color-background-info: #0c2a44;
+      --color-background-success: #04201a;
+      --color-background-warning: #2a1800;
+      --color-background-danger: #2a0a0a;
+      --color-text-primary: #f0f0f0;
+      --color-text-secondary: #aaaaaa;
+      --color-text-info: #85B7EB;
+      --color-text-success: #5DCAA5;
+      --color-text-warning: #EF9F27;
+      --color-text-danger: #F09595;
+      --color-border-tertiary: rgba(255,255,255,0.12);
+      --color-border-secondary: rgba(255,255,255,0.22);
+    }
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font-sans);background:#f0f0f0;min-height:100vh;display:flex;justify-content:center;padding:1rem}
+  @media (prefers-color-scheme: dark){body{background:#111}}
+  .app{max-width:440px;width:100%;font-family:var(--font-sans)}
+  .screen{display:none}.screen.active{display:block}
+  h2{font-size:18px;font-weight:500;color:var(--color-text-primary)}
+  h3{font-size:15px;font-weight:500;color:var(--color-text-primary)}
+  .card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1rem}
+  label{font-size:13px;color:var(--color-text-secondary);display:block;margin:10px 0 4px}
+  input,select,textarea{width:100%;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:8px 10px;font-size:14px;background:var(--color-background-primary);color:var(--color-text-primary);font-family:var(--font-sans)}
+  textarea{resize:vertical;min-height:64px}
+  button{cursor:pointer;font-family:var(--font-sans)}
+  .btn{width:100%;padding:12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:14px;font-weight:500;margin-top:8px}
+  .btn:hover{background:var(--color-background-secondary)}
+  .btn:active{transform:scale(0.98)}
+  .btn-primary{background:#1D9E75;color:#fff;border-color:#1D9E75}
+  .btn-primary:hover{background:#0F6E56}
+  .btn-blue{background:#185FA5;color:#fff;border-color:#185FA5}
+  .btn-blue:hover{background:#0C447C}
+  .btn-danger{background:#E24B4A;color:#fff;border-color:#E24B4A}
+  .btn-danger:hover{background:#A32D2D}
+  .btn-sm{width:auto;padding:5px 12px;font-size:12px;margin-top:0}
+  .btn-xs{width:auto;padding:3px 9px;font-size:11px;margin-top:0}
+  .clock{font-size:34px;font-weight:500;color:var(--color-text-primary);text-align:center;font-family:var(--font-mono);letter-spacing:2px;margin:0.5rem 0}
+  .date-sub{font-size:13px;color:var(--color-text-secondary);text-align:center;margin-bottom:1rem}
+  .stamp-result{margin-top:8px;padding:8px 10px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);font-size:13px;color:var(--color-text-secondary);min-height:36px}
+  .stamp-result.ok{color:var(--color-text-primary)}
+  .tabs{display:flex;gap:4px;margin-bottom:1rem;background:var(--color-background-secondary);padding:4px;border-radius:var(--border-radius-md)}
+  .tab{flex:1;padding:7px;text-align:center;font-size:13px;cursor:pointer;border-radius:6px;color:var(--color-text-secondary);border:none;background:none}
+  .tab.active{background:var(--color-background-primary);color:var(--color-text-primary);font-weight:500;border:0.5px solid var(--color-border-tertiary)}
+  .badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;margin-right:4px}
+  .badge-in{background:#E1F5EE;color:#0F6E56}
+  .badge-out{background:#E6F1FB;color:#185FA5}
+  .badge-fix{background:#FAEEDA;color:#633806}
+  .rec-item{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:0.75rem 1rem;margin-bottom:0.5rem}
+  .rec-date{font-weight:500;font-size:13px;color:var(--color-text-primary);margin-bottom:4px}
+  .rec-detail{font-size:12px;color:var(--color-text-secondary);line-height:1.7}
+  .rec-actions{display:flex;gap:6px;margin-top:8px}
+  .empty{text-align:center;color:var(--color-text-secondary);font-size:13px;padding:1.5rem 0}
+  .avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:15px;flex-shrink:0}
+  .header-row{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:0.5px solid var(--color-border-tertiary)}
+  .modal-overlay{background:rgba(0,0,0,0.4);border-radius:var(--border-radius-lg);padding:1.5rem;margin-bottom:1rem}
+  .modal-box{background:var(--color-background-primary);border-radius:var(--border-radius-lg);padding:1.25rem}
+  .gs-code{width:100%;font-family:var(--font-mono);font-size:11px;min-height:180px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:10px;background:var(--color-background-primary);color:var(--color-text-primary);resize:vertical}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .logout-btn{font-size:12px;padding:4px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:none;color:var(--color-text-secondary);cursor:pointer}
+  .logout-btn:hover{background:var(--color-background-secondary)}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div id="s-login" class="screen active">
+  <div style="text-align:center;padding:2rem 0 1rem">
+    <div style="font-size:22px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px">出退勤管理</div>
+    <div style="font-size:13px;color:var(--color-text-secondary)">ログインしてください</div>
+  </div>
+  <div class="card">
+    <label>従業員を選択</label>
+    <select id="loginUser">
+      <option value="">-- 選択してください --</option>
+    </select>
+    <label>パスワード（4桁の数字）</label>
+    <input type="password" id="loginPass" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="例: 1234" />
+    <button class="btn btn-primary" onclick="doLogin()" style="margin-top:14px">ログイン</button>
+    <div id="loginErr" style="font-size:12px;color:var(--color-text-danger);margin-top:8px;min-height:16px"></div>
+  </div>
+  <div class="card" style="background:var(--color-background-secondary);border:none">
+    <div style="font-size:13px;font-weight:500;margin-bottom:8px">初回セットアップ</div>
+    <p style="font-size:12px;color:var(--color-text-secondary);line-height:1.7;margin-bottom:10px">従業員名とパスワードを設定します。</p>
+    <label>従業員名</label>
+    <input type="text" id="setupName" placeholder="例: 山田 太郎" maxlength="20"/>
+    <label>パスワード（4桁）</label>
+    <input type="password" id="setupPass" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="例: 1234"/>
+    <button class="btn" onclick="doSetup()" style="margin-top:10px">従業員を追加</button>
+    <div id="setupMsg" style="font-size:12px;margin-top:6px;min-height:16px"></div>
+  </div>
+</div>
+
+<div id="s-main" class="screen">
+  <div class="header-row">
+    <div class="avatar" id="mainAvatar" style="background:#E6F1FB;color:#185FA5"></div>
+    <div style="flex:1">
+      <div style="font-weight:500;font-size:15px" id="mainName"></div>
+      <div style="font-size:12px;color:var(--color-text-secondary)">ログイン中</div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">ログアウト</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('stamp')">打刻</button>
+    <button class="tab" onclick="showTab('records')">記録</button>
+    <button class="tab" onclick="showTab('export')">連携</button>
+  </div>
+
+  <div id="tab-stamp">
+    <div class="clock" id="clockDisp">--:--:--</div>
+    <div class="date-sub" id="dateDisp"></div>
+    <div class="card">
+      <div style="font-size:11px;color:var(--color-text-secondary);font-weight:500;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px">出勤打刻</div>
+      <button class="btn btn-primary" id="btnIn" onclick="stampIn()">出勤</button>
+      <div class="stamp-result" id="resIn">まだ打刻していません</div>
+    </div>
+    <div class="card">
+      <div style="font-size:11px;color:var(--color-text-secondary);font-weight:500;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px">退勤打刻</div>
+      <label>作業場所</label>
+      <select id="loc"><option>在宅</option><option>現場</option><option>その他</option></select>
+      <label>業務内容（任意）</label>
+      <textarea id="note" placeholder="例: 会議、資料作成、現場作業など"></textarea>
+      <button class="btn btn-blue" id="btnOut" onclick="stampOut()" style="margin-top:10px">退勤</button>
+      <div class="stamp-result" id="resOut">まだ打刻していません</div>
+    </div>
+  </div>
+
+  <div id="tab-records" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <h3>打刻履歴</h3>
+      <button class="btn btn-sm" onclick="openAddModal()">+ 打刻追加</button>
+    </div>
+    <div id="recList"><div class="empty">記録がありません</div></div>
+  </div>
+
+  <div id="tab-export" style="display:none">
+    <div class="card">
+      <h3 style="margin-bottom:8px">Google スプレッドシート連携</h3>
+      <p style="font-size:13px;color:var(--color-text-secondary);line-height:1.6;margin-bottom:10px">Apps Script のウェブアプリURLを設定すると、記録をスプレッドシートに自動送信できます。</p>
+      <label>ウェブアプリURL</label>
+      <input type="url" id="gsUrl" placeholder="https://script.google.com/macros/s/..." style="font-size:12px"/>
+      <button class="btn" onclick="saveGsUrl()">URLを保存</button>
+      <div id="gsStatus" style="font-size:12px;color:var(--color-text-secondary);margin-top:6px"></div>
+      <button class="btn btn-primary" onclick="exportGS()" style="margin-top:4px">スプレッドシートに送信</button>
+      <div id="exportMsg" style="font-size:12px;color:var(--color-text-secondary);margin-top:6px"></div>
+    </div>
+    <div class="card" style="background:var(--color-background-secondary);border:none">
+      <div style="font-size:13px;font-weight:500;margin-bottom:8px">Apps Script コード</div>
+      <textarea class="gs-code" id="gsCode" readonly></textarea>
+      <button class="btn" onclick="copyGsCode()" style="margin-top:8px">コードをコピー</button>
+    </div>
+  </div>
+</div>
+
+<div id="s-editmodal" class="screen">
+  <div class="modal-overlay" style="min-height:520px;display:flex;align-items:flex-start;justify-content:center;padding-top:2rem">
+    <div class="modal-box" style="width:100%">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <h3 id="modalTitle">打刻を修正</h3>
+        <button class="logout-btn" onclick="closeModal()">閉じる</button>
+      </div>
+      <label>日付</label>
+      <input type="date" id="editDate"/>
+      <div class="row2" style="margin-top:10px">
+        <div>
+          <label>出勤時刻</label>
+          <input type="time" id="editTimeIn"/>
+        </div>
+        <div>
+          <label>退勤時刻</label>
+          <input type="time" id="editTimeOut"/>
+        </div>
+      </div>
+      <label>作業場所</label>
+      <select id="editLoc"><option>在宅</option><option>現場</option><option>その他</option></select>
+      <label>業務内容</label>
+      <textarea id="editNote" placeholder="任意"></textarea>
+      <button class="btn btn-primary" onclick="saveEdit()" style="margin-top:12px" id="editSaveBtn">保存する</button>
+      <button class="btn" onclick="closeModal()" style="margin-top:4px">キャンセル</button>
+      <div id="editMsg" style="font-size:12px;color:var(--color-text-secondary);margin-top:6px"></div>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+const DAYS=['日','月','火','水','木','金','土'];
+function pad(n){return String(n).padStart(2,'0')}
+function fmtDate(d){return`${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}`}
+function fmtTime(d){return`${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`}
+function fmtDay(d){return DAYS[d.getDay()]}
+function todayStr(){const d=new Date();return`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
+function initials(name){return name.replace(/\s/g,'').slice(0,2)}
+const AVATAR_COLORS=[['#E6F1FB','#185FA5'],['#E1F5EE','#0F6E56'],['#FAEEDA','#633806']];
+
+let currentUser=null;
+let editingRecId=null;
+let editingMode='edit';
+
+function getUsers(){return JSON.parse(localStorage.getItem('kt_users')||'[]')}
+function saveUsers(u){localStorage.setItem('kt_users',JSON.stringify(u))}
+function getRecords(uid){return JSON.parse(localStorage.getItem('kt_rec_'+uid)||'[]')}
+function saveRecords(uid,r){localStorage.setItem('kt_rec_'+uid,JSON.stringify(r))}
+function getGsUrl(uid){return localStorage.getItem('kt_gs_'+uid)||''}
+function saveGsUrlForUser(uid,url){localStorage.setItem('kt_gs_'+uid,url)}
+
+function hashPin(pin){
+  let h=0;for(let i=0;i<pin.length;i++){h=(Math.imul(31,h)+pin.charCodeAt(i))|0}
+  return String(h)
+}
+
+function populateUserSelect(){
+  const users=getUsers();
+  const sel=document.getElementById('loginUser');
+  sel.innerHTML='<option value="">-- 選択してください --</option>';
+  users.forEach(u=>{
+    const o=document.createElement('option');
+    o.value=u.id;o.textContent=u.name;sel.appendChild(o);
+  });
+}
+
+function doSetup(){
+  const name=document.getElementById('setupName').value.trim();
+  const pass=document.getElementById('setupPass').value.trim();
+  const msg=document.getElementById('setupMsg');
+  if(!name){msg.style.color='var(--color-text-danger)';msg.textContent='名前を入力してください';return}
+  if(!/^\d{4}$/.test(pass)){msg.style.color='var(--color-text-danger)';msg.textContent='4桁の数字を入力してください';return}
+  const users=getUsers();
+  if(users.length>=3){msg.style.color='var(--color-text-danger)';msg.textContent='従業員は最大3名です';return}
+  if(users.find(u=>u.name===name)){msg.style.color='var(--color-text-danger)';msg.textContent='同じ名前が既に登録されています';return}
+  const id='u'+Date.now();
+  const idx=users.length;
+  users.push({id,name,pin:hashPin(pass),colorIdx:idx});
+  saveUsers(users);
+  msg.style.color='var(--color-text-success)';msg.textContent=`「${name}」を追加しました`;
+  document.getElementById('setupName').value='';
+  document.getElementById('setupPass').value='';
+  populateUserSelect();
+}
+
+function doLogin(){
+  const uid=document.getElementById('loginUser').value;
+  const pass=document.getElementById('loginPass').value;
+  const err=document.getElementById('loginErr');
+  if(!uid){err.textContent='従業員を選択してください';return}
+  if(!pass){err.textContent='パスワードを入力してください';return}
+  const users=getUsers();
+  const user=users.find(u=>u.id===uid);
+  if(!user||user.pin!==hashPin(pass)){err.textContent='パスワードが違います';return}
+  currentUser=user;
+  document.getElementById('loginPass').value='';
+  err.textContent='';
+  showMain();
+}
+
+function doLogout(){
+  currentUser=null;
+  showScreen('s-login');
+  populateUserSelect();
+}
+
+function showMain(){
+  const c=AVATAR_COLORS[currentUser.colorIdx%3];
+  const av=document.getElementById('mainAvatar');
+  av.style.background=c[0];av.style.color=c[1];
+  av.textContent=initials(currentUser.name);
+  document.getElementById('mainName').textContent=currentUser.name;
+  const gsUrl=getGsUrl(currentUser.id);
+  document.getElementById('gsUrl').value=gsUrl;
+  showScreen('s-main');
+  showTab('stamp');
+  restoreUI();
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showTab(name){
+  ['stamp','records','export'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display=t===name?'':'none';
+  });
+  document.querySelectorAll('.tab').forEach((el,i)=>{
+    el.classList.toggle('active',['stamp','records','export'][i]===name);
+  });
+  if(name==='records')renderRecords();
+  if(name==='export'){
+    const saved=getGsUrl(currentUser.id);
+    if(saved)document.getElementById('gsUrl').value=saved;
+  }
+}
+
+function updateClock(){
+  const now=new Date();
+  document.getElementById('clockDisp').textContent=fmtTime(now);
+  document.getElementById('dateDisp').textContent=`${fmtDate(now)}（${fmtDay(now)}）`;
+}
+setInterval(updateClock,1000);
+updateClock();
+
+function findTodayRec(){
+  const key=todayStr();
+  return getRecords(currentUser.id).find(r=>r.dateKey===key);
+}
+
+function restoreUI(){
+  const rec=findTodayRec();
+  if(rec&&rec.timeIn){
+    document.getElementById('resIn').textContent=`打刻済 ${rec.date}（${rec.day}） ${rec.timeIn}`;
+    document.getElementById('resIn').classList.add('ok');
+    document.getElementById('btnIn').disabled=true;
+  }else{
+    document.getElementById('resIn').textContent='まだ打刻していません';
+    document.getElementById('resIn').classList.remove('ok');
+    document.getElementById('btnIn').disabled=false;
+  }
+  if(rec&&rec.timeOut){
+    document.getElementById('resOut').textContent=`打刻済 ${rec.date}（${rec.day}） ${rec.timeOut} / ${rec.location}`;
+    document.getElementById('resOut').classList.add('ok');
+    document.getElementById('btnOut').disabled=true;
+  }else{
+    document.getElementById('resOut').textContent='まだ打刻していません';
+    document.getElementById('resOut').classList.remove('ok');
+    document.getElementById('btnOut').disabled=false;
+  }
+}
+
+function stampIn(){
+  const now=new Date();
+  const key=todayStr();
+  const recs=getRecords(currentUser.id);
+  if(recs.find(r=>r.dateKey===key)){alert('本日の出勤打刻は済んでいます。修正は「記録」タブから行えます。');return}
+  const rec={id:'r'+Date.now(),dateKey:key,date:fmtDate(now),day:fmtDay(now),timeIn:fmtTime(now),timeOut:'',location:'',note:'',workMinutes:'',fixed:false,sent:false};
+  recs.unshift(rec);
+  saveRecords(currentUser.id,recs);
+  restoreUI();
+}
+
+function stampOut(){
+  const now=new Date();
+  const key=todayStr();
+  const recs=getRecords(currentUser.id);
+  const idx=recs.findIndex(r=>r.dateKey===key);
+  if(idx<0){alert('先に出勤打刻してください。');return}
+  if(recs[idx].timeOut){alert('本日の退勤打刻は済んでいます。修正は「記録」タブから行えます。');return}
+  recs[idx].timeOut=fmtTime(now);
+  recs[idx].location=document.getElementById('loc').value;
+  recs[idx].note=document.getElementById('note').value.trim();
+  recs[idx].workMinutes=calcMinutes(recs[idx].timeIn,fmtTime(now));
+  saveRecords(currentUser.id,recs);
+  restoreUI();
+}
+
+function calcMinutes(t1,t2){
+  if(!t1||!t2)return'';
+  const[h1,m1,s1]=t1.split(':').map(Number);
+  const[h2,m2,s2]=t2.split(':').map(Number);
+  const inSec=h1*3600+m1*60+(s1||0);
+  const outSec=h2*3600+m2*60+(s2||0);
+  let total=outSec-inSec;
+  const breakStart=12*3600, breakEnd=13*3600;
+  const overlapStart=Math.max(inSec,breakStart);
+  const overlapEnd=Math.min(outSec,breakEnd);
+  if(overlapEnd>overlapStart)total-=(overlapEnd-overlapStart);
+  return Math.round(total/60);
+}
+
+function fmtWork(m){
+  if(m===''||m===undefined||m===null)return'';
+  const h=Math.floor(m/60),min=m%60;
+  return h>0?`${h}時間${min>0?min+'分':''}`:`${min}分`;
+}
+
+function renderRecords(){
+  const recs=getRecords(currentUser.id);
+  const el=document.getElementById('recList');
+  if(!recs.length){el.innerHTML='<div class="empty">記録がありません</div>';return}
+  el.innerHTML=recs.map(r=>`
+    <div class="rec-item">
+      <div class="rec-date">${r.date}（${r.day}）${r.fixed?'<span class="badge badge-fix" style="margin-left:6px">修正済</span>':''}</div>
+      <div class="rec-detail">
+        <span class="badge badge-in">出勤</span>${r.timeIn||'未打刻'}
+        　<span class="badge badge-out">退勤</span>${r.timeOut||'未打刻'}
+        ${r.workMinutes!==''&&r.workMinutes!==undefined?`　実働 <strong>${fmtWork(r.workMinutes)}</strong>`:''}
+      </div>
+      ${r.location?`<div class="rec-detail">場所: ${r.location}</div>`:''}
+      ${r.note?`<div class="rec-detail" style="margin-top:3px;background:var(--color-background-secondary);padding:3px 7px;border-radius:4px;display:inline-block">${r.note}</div>`:''}
+      <div class="rec-actions">
+        <button class="btn btn-xs" onclick="openEditModal('${r.id}')">修正</button>
+        <button class="btn btn-xs btn-danger" onclick="deleteRec('${r.id}')">削除</button>
+      </div>
+    </div>`).join('');
+}
+
+function openAddModal(){
+  editingRecId=null;editingMode='add';
+  document.getElementById('modalTitle').textContent='打刻を追加（遡り入力）';
+  document.getElementById('editDate').value=todayStr();
+  document.getElementById('editTimeIn').value='09:00';
+  document.getElementById('editTimeOut').value='18:00';
+  document.getElementById('editLoc').value='在宅';
+  document.getElementById('editNote').value='';
+  document.getElementById('editMsg').textContent='';
+  document.getElementById('editSaveBtn').textContent='追加する';
+  showScreen('s-editmodal');
+}
+
+function openEditModal(id){
+  const recs=getRecords(currentUser.id);
+  const rec=recs.find(r=>r.id===id);
+  if(!rec)return;
+  editingRecId=id;editingMode='edit';
+  document.getElementById('modalTitle').textContent='打刻を修正';
+  document.getElementById('editDate').value=rec.dateKey;
+  document.getElementById('editTimeIn').value=rec.timeIn?rec.timeIn.slice(0,5):'';
+  document.getElementById('editTimeOut').value=rec.timeOut?rec.timeOut.slice(0,5):'';
+  document.getElementById('editLoc').value=rec.location||'在宅';
+  document.getElementById('editNote').value=rec.note||'';
+  document.getElementById('editMsg').textContent='';
+  document.getElementById('editSaveBtn').textContent='保存する';
+  showScreen('s-editmodal');
+}
+
+function saveEdit(){
+  const dateVal=document.getElementById('editDate').value;
+  const tIn=document.getElementById('editTimeIn').value;
+  const tOut=document.getElementById('editTimeOut').value;
+  const loc=document.getElementById('editLoc').value;
+  const note=document.getElementById('editNote').value.trim();
+  const msg=document.getElementById('editMsg');
+  if(!dateVal){msg.textContent='日付を入力してください';return}
+  if(!tIn&&!tOut){msg.textContent='出勤か退勤どちらか入力してください';return}
+  const d=new Date(dateVal);
+  const dateStr=fmtDate(d);
+  const dayStr=fmtDay(d);
+  const tIn6=tIn?tIn+':00':'';
+  const tOut6=tOut?tOut+':00':'';
+  const wm=tIn&&tOut?calcMinutes(tIn+':00',tOut+':00'):'';
+  const recs=getRecords(currentUser.id);
+  if(editingMode==='add'){
+    if(recs.find(r=>r.dateKey===dateVal)){msg.textContent='この日付の記録は既に存在します。修正ボタンをお使いください。';return}
+    const newRec={id:'r'+Date.now(),dateKey:dateVal,date:dateStr,day:dayStr,timeIn:tIn6,timeOut:tOut6,location:loc,note,workMinutes:wm,fixed:true,sent:false};
+    recs.unshift(newRec);
+    recs.sort((a,b)=>b.dateKey.localeCompare(a.dateKey));
+  }else{
+    const idx=recs.findIndex(r=>r.id===editingRecId);
+    if(idx<0){msg.textContent='記録が見つかりません';return}
+    recs[idx]={...recs[idx],dateKey:dateVal,date:dateStr,day:dayStr,timeIn:tIn6,timeOut:tOut6,location:loc,note,workMinutes:wm,fixed:true,sent:false};
+  }
+  saveRecords(currentUser.id,recs);
+  if(dateVal===todayStr())restoreUI();
+  closeModal();
+}
+
+function deleteRec(id){
+  if(!confirm('この記録を削除しますか？'))return;
+  const recs=getRecords(currentUser.id).filter(r=>r.id!==id);
+  saveRecords(currentUser.id,recs);
+  renderRecords();
+}
+
+function closeModal(){
+  showScreen('s-main');
+  renderRecords();
+}
+
+function saveGsUrl(){
+  const url=document.getElementById('gsUrl').value.trim();
+  saveGsUrlForUser(currentUser.id,url);
+  document.getElementById('gsStatus').textContent=url?'URLを保存しました。':'URLをクリアしました。';
+}
+
+async function exportGS(){
+  const url=getGsUrl(currentUser.id);
+  const msg=document.getElementById('exportMsg');
+  if(!url){msg.textContent='先にURLを保存してください。';return}
+  const recs=getRecords(currentUser.id).filter(r=>r.timeIn&&r.timeOut&&!r.sent);
+  if(!recs.length){msg.textContent='送信する未送信の記録がありません。';return}
+  msg.textContent='送信中...';
+  let ok=0;
+  for(const r of recs){
+    try{
+      await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...r,userName:currentUser.name}),mode:'no-cors'});
+      r.sent=true;ok++;
+    }catch(e){}
+  }
+  const all=getRecords(currentUser.id);
+  recs.forEach(r=>{const i=all.findIndex(x=>x.id===r.id);if(i>=0)all[i].sent=true;});
+  saveRecords(currentUser.id,all);
+  msg.textContent=ok>0?`${ok}件を送信しました。`:'送信に失敗しました。URLを確認してください。';
+}
+
+function copyGsCode(){
+  navigator.clipboard.writeText(document.getElementById('gsCode').value).then(()=>alert('コードをコピーしました！'));
+}
+
+const GS_CODE=`function doPost(e) {
+  const data = JSON.parse(e.postData.contents);
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheetName = data.userName || '勤怠記録';
+  let sheet = ss.getSheetByName(sheetName);
+  if (!sheet) {
+    sheet = ss.insertSheet(sheetName);
+    sheet.appendRow(['日付','曜日','出勤時刻','退勤時刻',
+      '作業場所','業務内容','実働時間(分)','修正フラグ']);
+  }
+  sheet.appendRow([
+    data.date, data.day, data.timeIn, data.timeOut,
+    data.location, data.note, data.workMinutes,
+    data.fixed ? '修正' : ''
+  ]);
+  return ContentService.createTextOutput('ok');
+}`;
+
+document.getElementById('gsCode').value=GS_CODE;
+populateUserSelect();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
