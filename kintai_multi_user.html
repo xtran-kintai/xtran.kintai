@@ -12,7 +12,7 @@
   --nv-m: #3a429e;
   --ok: #16a34a;
   --wa: #d97706;
-  --ng: #dc2626;
+  --ng: #dc2626;f
   --t2: #6b7280;
   --t3: #9ca3af;
   --bd: rgba(43,49,114,0.13);
@@ -301,17 +301,24 @@ async function doPunch(type) {
   updateStatus(type === '出勤' ? 'in' : 'out');
 
   try {
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      body: JSON.stringify({
-        action:  'punch',
-        type,
-        empId:   currentEmp.id,
-        empName: currentEmp.name,
-      })
-    });
-    const data = await res.json();
-    if (data.success) {
+    const now = new Date();
+const wd = ['日','月','火','水','木','金','土'];
+const res = await fetch(API_URL, {
+  method: 'POST',
+  body: JSON.stringify({
+    userName: currentEmp.name,
+    date: `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`,
+    day: wd[now.getDay()],
+    timeIn:  type === '出勤' ? t : '',
+    timeOut: type === '退勤' ? t : '',
+    location: '',
+    note: '',
+    workMinutes: 0,
+    fixed: false
+  })
+});
+const text = await res.text();
+if (text === 'ok') {
       punchLogs[0].state = '記録済';
       renderLogs();
       if (type === '退勤') {
