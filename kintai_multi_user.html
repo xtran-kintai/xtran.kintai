@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Xtran 打刻</title>
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
 <style>
 :root{--nv:#2b3172;--nv-p:#eef0fa;--nv-m:#3a429e;--ok:#16a34a;--wa:#d97706;--ng:#dc2626;--t2:#6b7280;--t3:#9ca3af;--bd:rgba(43,49,114,0.13);--bd2:rgba(43,49,114,0.22)}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -87,16 +89,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 <body>
 
 <div class="header">
-  <div class="logo">
-    <svg viewBox="0 0 120 30" fill="none">
-      <line x1="4" y1="4" x2="18" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
-      <line x1="18" y1="4" x2="4" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
-      <line x1="12" y1="4" x2="26" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
-      <line x1="26" y1="4" x2="12" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
-      <circle cx="4" cy="26" r="3" fill="white"/>
-      <circle cx="18" cy="26" r="3" fill="white"/>
-      <text x="34" y="22" font-size="19" font-weight="500" fill="white" font-family="sans-serif">Xtran</text>
-    </svg>
+  <div class="logo" onclick="location.reload()" style="cursor:pointer">
+    <img src="icon-192.png" style="height:32px;width:32px;border-radius:6px">
     <div class="greeting" id="greeting">おはようございます</div>
   </div>
   <div class="emp-badge" onclick="openEmpModal()" id="emp-badge">読み込み中...</div>
