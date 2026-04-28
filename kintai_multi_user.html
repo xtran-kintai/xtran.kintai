@@ -11,8 +11,8 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;background:#f1f3fb;min-height:100vh}
 .header{background:var(--nv);padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between}
-.logo{display:flex;align-items:center;gap:8px}
-.logo svg{height:20px}
+.logo{display:flex;align-items:center;gap:8px;cursor:pointer}
+.logo img{height:32px;width:32px;border-radius:6px}
 .greeting{font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px}
 .emp-badge{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:4px 12px;font-size:12px;color:white;cursor:pointer}
 .main{padding:14px;max-width:480px;margin:0 auto}
@@ -46,12 +46,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .kpi-val{font-size:22px;font-weight:500;color:var(--nv)}
 .kpi-val.sm{font-size:16px}
 .kpi-note{font-size:11px;color:var(--t3);margin-top:3px}
-.bar-list{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
-.bar-row{display:flex;align-items:center;gap:10px}
-.bar-label{font-size:12px;color:var(--t2);width:38px;text-align:right;flex-shrink:0}
-.bar-track{flex:1;height:16px;background:var(--nv-p);border-radius:4px;overflow:hidden}
-.bar-fill{height:100%;background:var(--nv);border-radius:4px;display:flex;align-items:center;padding-left:8px}
-.bar-val{font-size:10px;color:rgba(255,255,255,0.9)}
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:flex-end}
 .overlay.show{display:flex}
 .modal{background:white;border-radius:16px 16px 0 0;width:100%;padding:16px;max-height:70vh;overflow-y:auto}
@@ -77,6 +71,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .submit-btn:active{opacity:0.85}
 .cancel-link{display:block;text-align:center;margin-top:12px;font-size:13px;color:var(--t3);cursor:pointer}
 .correction-note{background:rgba(217,119,6,0.08);border:1px solid rgba(217,119,6,0.2);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--wa);margin-bottom:12px;line-height:1.5;display:none}
+
+/* PINパッド */
+.pin-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;align-items:flex-end}
+.pin-overlay.show{display:flex}
+.pin-modal{background:white;border-radius:16px 16px 0 0;width:100%;padding:20px 16px;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+.pin-title{font-size:15px;font-weight:500;color:var(--nv);text-align:center;margin-bottom:4px}
+.pin-sub{font-size:12px;color:var(--t3);text-align:center;margin-bottom:16px}
+.pin-emp{font-size:13px;font-weight:500;color:var(--nv);text-align:center;margin-bottom:12px}
+.pin-dots{display:flex;justify-content:center;gap:12px;margin-bottom:20px}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--bd2);transition:all 0.15s}
+.pin-dot.filled{background:var(--nv);border-color:var(--nv)}
+.pin-dot.error{background:var(--ng);border-color:var(--ng)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:280px;margin:0 auto}
+.pin-key{background:var(--nv-p);border:none;border-radius:10px;padding:16px;font-size:20px;font-weight:500;color:var(--nv);cursor:pointer;transition:all 0.1s;text-align:center}
+.pin-key:active{background:var(--nv);color:white;transform:scale(0.95)}
+.pin-key.del{font-size:14px;color:var(--t2)}
+.pin-key.empty{background:transparent;cursor:default}
+.pin-error{color:var(--ng);font-size:12px;text-align:center;margin-top:8px;min-height:18px}
+.pin-cancel{display:block;text-align:center;margin-top:14px;font-size:13px;color:var(--t3);cursor:pointer}
+
 .tab-bar{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--bd);display:flex;padding-bottom:env(safe-area-inset-bottom)}
 .tab-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0 10px;cursor:pointer;gap:3px;color:var(--t3);transition:color 0.15s}
 .tab-item svg{width:22px;height:22px}
@@ -89,8 +103,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 <body>
 
 <div class="header">
-  <div class="logo" onclick="location.reload()" style="cursor:pointer">
-    <img src="icon-192.png" style="height:32px;width:32px;border-radius:6px">
+  <div class="logo" onclick="location.reload()">
+    <img src="icon-192.png">
     <div class="greeting" id="greeting">おはようございます</div>
   </div>
   <div class="emp-badge" onclick="openEmpModal()" id="emp-badge">読み込み中...</div>
@@ -124,7 +138,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
     <div class="section-title">週別実労働時間</div>
     <div class="bar-list" id="bar-list"></div>
   </div>
-
   <div class="pb-space"></div>
 </div>
 
@@ -136,7 +149,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
   </div>
 </div>
 
-<!-- 打刻モーダル（出勤・退勤共通） -->
+<!-- PIN入力モーダル -->
+<div class="pin-overlay" id="pin-overlay">
+  <div class="pin-modal">
+    <div class="pin-title" id="pin-title">PIN認証</div>
+    <div class="pin-sub" id="pin-sub">4桁のPINコードを入力してください</div>
+    <div class="pin-emp" id="pin-emp"></div>
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-pad">
+      <div class="pin-key" onclick="pinInput('1')">1</div>
+      <div class="pin-key" onclick="pinInput('2')">2</div>
+      <div class="pin-key" onclick="pinInput('3')">3</div>
+      <div class="pin-key" onclick="pinInput('4')">4</div>
+      <div class="pin-key" onclick="pinInput('5')">5</div>
+      <div class="pin-key" onclick="pinInput('6')">6</div>
+      <div class="pin-key" onclick="pinInput('7')">7</div>
+      <div class="pin-key" onclick="pinInput('8')">8</div>
+      <div class="pin-key" onclick="pinInput('9')">9</div>
+      <div class="pin-key empty"></div>
+      <div class="pin-key" onclick="pinInput('0')">0</div>
+      <div class="pin-key del" onclick="pinDelete()">⌫</div>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
+    <span class="pin-cancel" id="pin-cancel" onclick="closePinModal()">キャンセル</span>
+  </div>
+</div>
+
+<!-- 打刻モーダル -->
 <div class="punch-overlay" id="punch-overlay">
   <div class="punch-modal">
     <div class="punch-modal-title" id="punch-modal-title">出勤打刻</div>
@@ -199,8 +243,11 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbxAAMDA8tweSwkqB8ccQXrD
 let currentEmp  = null;
 let employees   = [];
 let punchLogs   = [];
-let punchState  = 'none'; // 'none' | 'in' | 'out'
+let punchState  = 'none';
 let currentType = '出勤';
+let pinBuffer   = '';
+let pinMode     = ''; // 'verify' | 'register' | 'confirm'
+let pinFirst    = ''; // 初回登録時の1回目PIN
 
 // ============================================================
 //  初期化
@@ -208,22 +255,15 @@ let currentType = '出勤';
 window.addEventListener('DOMContentLoaded', async () => {
   tickClock();
   setInterval(tickClock, 1000);
-
   const saved = localStorage.getItem('xtran_emp');
-  if (saved) {
-    try { currentEmp = JSON.parse(saved); } catch(e) {}
-  }
-
+  if (saved) { try { currentEmp = JSON.parse(saved); } catch(e) {} }
   await loadEmployees();
   if (currentEmp) {
     updateEmpDisplay();
-    await loadTodayLogs(); // ← 従業員確定後に今日のログを取得して状態を復元
+    await loadTodayLogs();
   }
 });
 
-// ============================================================
-//  時計
-// ============================================================
 function tickClock() {
   const n = new Date();
   document.getElementById('clock').textContent = n.toLocaleTimeString('ja-JP');
@@ -236,39 +276,36 @@ function tickClock() {
 }
 
 // ============================================================
-//  従業員リスト取得
+//  従業員リスト
 // ============================================================
 async function loadEmployees() {
   try {
     const res = await fetch(`${API_URL}?action=getEmployees`);
-    if (!res.ok) throw new Error('fetch failed');
+    if (!res.ok) throw new Error();
     const data = await res.json();
-    if (!Array.isArray(data)) throw new Error('invalid data');
+    if (!Array.isArray(data)) throw new Error();
     employees = data;
     buildEmpModal();
-    // ローカルに保存した従業員が従業員リストにいなければリセット
     if (currentEmp) {
       const found = employees.find(e => e.name === currentEmp.name);
       if (!found) currentEmp = null;
     }
-    // 未選択なら最初の従業員をデフォルトにする
     if (!currentEmp && employees.length > 0) {
-      currentEmp = employees[0];
-      localStorage.setItem('xtran_emp', JSON.stringify(currentEmp));
+      // デフォルト選択はせずPIN認証を促す
       updateEmpDisplay();
     }
   } catch(e) {
-    showNotice('従業員リストの取得に失敗しました。ページを再読み込みしてください。', 'err');
+    showNotice('従業員リストの取得に失敗しました。再読み込みしてください。', 'err');
   }
 }
 
 function buildEmpModal() {
   document.getElementById('emp-modal-list').innerHTML = employees.map(e =>
-    `<button class="emp-btn" onclick="selectEmp('${e.name.replace(/'/g,"\\'")}')">
+    `<button class="emp-btn" onclick="selectEmpAndPin('${e.name.replace(/'/g,"\\'")}')">
       <div class="emp-av">${e.name.slice(0,2)}</div>
       <div style="text-align:left">
         <div class="emp-name">${e.name}</div>
-        <div class="emp-role">${e.role} ／ 時給 ¥${Number(e.wage).toLocaleString()}</div>
+        <div class="emp-role">${e.role}</div>
       </div>
     </button>`
   ).join('');
@@ -277,21 +314,165 @@ function buildEmpModal() {
 function openEmpModal()  { document.getElementById('overlay').classList.add('show'); }
 function closeEmpModal() { document.getElementById('overlay').classList.remove('show'); }
 
-async function selectEmp(name) {
-  currentEmp = employees.find(e => e.name === name);
-  if (!currentEmp) return;
-  localStorage.setItem('xtran_emp', JSON.stringify(currentEmp));
-  updateEmpDisplay();
+// 従業員選択 → PIN認証へ
+async function selectEmpAndPin(name) {
   closeEmpModal();
+  const emp = employees.find(e => e.name === name);
+  if (!emp) return;
+
+  // PIN設定済みか確認
+  try {
+    const res  = await fetch(`${API_URL}?action=hasPin&empName=${encodeURIComponent(name)}`);
+    const data = await res.json();
+    if (data.hasPin) {
+      openPinModal('verify', emp);
+    } else {
+      openPinModal('register', emp);
+    }
+  } catch(e) {
+    showNotice('接続に失敗しました。', 'err');
+  }
+}
+
+function updateEmpDisplay() {
+  document.getElementById('emp-badge').textContent = currentEmp ? currentEmp.name : '従業員を選択';
+}
+
+// ============================================================
+//  PIN認証
+// ============================================================
+function openPinModal(mode, emp) {
+  pinMode   = mode;
+  pinBuffer = '';
+  pinFirst  = '';
+  updatePinDots();
+  document.getElementById('pin-error').textContent = '';
+  document.getElementById('pin-emp').textContent   = emp.name;
+  document.getElementById('pin-cancel').style.display = 'block';
+
+  if (mode === 'register') {
+    document.getElementById('pin-title').textContent = '初回PIN設定';
+    document.getElementById('pin-sub').textContent   = '好きな4桁のPINコードを設定してください';
+  } else {
+    document.getElementById('pin-title').textContent = 'PIN認証';
+    document.getElementById('pin-sub').textContent   = '4桁のPINコードを入力してください';
+  }
+
+  // 仮の従業員をセット（認証前）
+  window._pendingEmp = emp;
+  document.getElementById('pin-overlay').classList.add('show');
+}
+
+function closePinModal() {
+  document.getElementById('pin-overlay').classList.remove('show');
+  pinBuffer = '';
+  pinFirst  = '';
+  window._pendingEmp = null;
+}
+
+function pinInput(digit) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += digit;
+  updatePinDots();
+  if (pinBuffer.length === 4) {
+    setTimeout(() => processPinComplete(), 150);
+  }
+}
+
+function pinDelete() {
+  if (pinBuffer.length > 0) {
+    pinBuffer = pinBuffer.slice(0, -1);
+    updatePinDots();
+  }
+}
+
+function updatePinDots(state) {
+  for (let i = 0; i < 4; i++) {
+    const dot = document.getElementById('pd' + i);
+    dot.className = 'pin-dot';
+    if (state === 'error') dot.classList.add('error');
+    else if (i < pinBuffer.length) dot.classList.add('filled');
+  }
+}
+
+async function processPinComplete() {
+  const emp = window._pendingEmp;
+  if (!emp) return;
+
+  if (pinMode === 'register') {
+    // 初回設定：1回目
+    pinFirst  = pinBuffer;
+    pinBuffer = '';
+    updatePinDots();
+    document.getElementById('pin-title').textContent = 'PIN確認';
+    document.getElementById('pin-sub').textContent   = 'もう一度同じPINを入力してください';
+    pinMode = 'confirm';
+
+  } else if (pinMode === 'confirm') {
+    // 初回設定：確認入力
+    if (pinBuffer !== pinFirst) {
+      document.getElementById('pin-error').textContent = 'PINが一致しません。最初からやり直してください。';
+      updatePinDots('error');
+      setTimeout(() => {
+        pinBuffer = '';
+        pinFirst  = '';
+        pinMode   = 'register';
+        updatePinDots();
+        document.getElementById('pin-title').textContent = '初回PIN設定';
+        document.getElementById('pin-sub').textContent   = '好きな4桁のPINコードを設定してください';
+        document.getElementById('pin-error').textContent = '';
+      }, 1500);
+      return;
+    }
+    // PINを保存
+    try {
+      const res  = await fetch(`${API_URL}?action=registerPin&empName=${encodeURIComponent(emp.name)}&pin=${pinBuffer}`);
+      const data = await res.json();
+      if (data.success) {
+        pinSuccess(emp);
+      } else {
+        document.getElementById('pin-error').textContent = '登録に失敗しました。';
+      }
+    } catch(e) {
+      document.getElementById('pin-error').textContent = '通信エラーが発生しました。';
+    }
+
+  } else if (pinMode === 'verify') {
+    // 認証
+    try {
+      const res  = await fetch(`${API_URL}?action=verifyPin&empName=${encodeURIComponent(emp.name)}&pin=${pinBuffer}`);
+      const data = await res.json();
+      if (data.success) {
+        pinSuccess(emp);
+      } else {
+        document.getElementById('pin-error').textContent = 'PINが違います。もう一度入力してください。';
+        updatePinDots('error');
+        setTimeout(() => {
+          pinBuffer = '';
+          updatePinDots();
+          document.getElementById('pin-error').textContent = '';
+        }, 1500);
+      }
+    } catch(e) {
+      document.getElementById('pin-error').textContent = '通信エラーが発生しました。';
+    }
+  }
+}
+
+function pinSuccess(emp) {
+  document.getElementById('pin-overlay').classList.remove('show');
+  currentEmp = emp;
+  localStorage.setItem('xtran_emp', JSON.stringify(currentEmp));
+  // 当日認証済みとしてlocalStorageに保存
+  const today = new Date().toISOString().slice(0, 10);
+  localStorage.setItem('xtran_pin_date_' + emp.name, today);
+  updateEmpDisplay();
   punchLogs  = [];
   punchState = 'none';
   renderLogs();
   updateStatus('none');
-  await loadTodayLogs(); // 従業員切替後にその人の今日のログを取得
-}
-
-function updateEmpDisplay() {
-  document.getElementById('emp-badge').textContent = currentEmp ? currentEmp.name : '未選択';
+  loadTodayLogs();
+  showNotice('ログインしました。', 'ok');
 }
 
 // ============================================================
@@ -307,23 +488,20 @@ function openPunchModal(type) {
   }
 
   currentType = type;
-
   const now     = new Date();
   const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
   const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 
-  document.getElementById('punch-date').value        = dateStr;
-  document.getElementById('punch-time').value        = timeStr;
-  document.getElementById('punch-modal-title').textContent  = type + '打刻';
-  document.getElementById('punch-submit-btn').textContent   = type + 'する';
+  document.getElementById('punch-date').value       = dateStr;
+  document.getElementById('punch-time').value       = timeStr;
+  document.getElementById('punch-modal-title').textContent = type + '打刻';
+  document.getElementById('punch-submit-btn').textContent  = type + 'する';
   document.getElementById('correction-note').style.display = 'none';
   document.getElementById('checkout-fields').style.display = type === '退勤' ? 'block' : 'none';
-
   if (type === '退勤') {
     document.getElementById('location-select').value = '';
     document.getElementById('note-input').value      = '';
   }
-
   document.getElementById('punch-overlay').classList.add('show');
 }
 
@@ -344,7 +522,6 @@ function checkCorrectionMode() {
 async function submitPunch() {
   const dateVal = document.getElementById('punch-date').value;
   const timeVal = document.getElementById('punch-time').value;
-
   if (!dateVal) { alert('日付を入力してください'); return; }
   if (!timeVal) { alert('時刻を入力してください'); return; }
 
@@ -353,8 +530,7 @@ async function submitPunch() {
   const wd      = ['日','月','火','水','木','金','土'];
   const dayStr  = wd[new Date(dateVal).getDay()];
 
-  let location = '';
-  let note     = '';
+  let location = '', note = '';
   if (currentType === '退勤') {
     location = document.getElementById('location-select').value;
     note     = document.getElementById('note-input').value.trim();
@@ -363,8 +539,6 @@ async function submitPunch() {
   }
 
   closePunchModal();
-
-  // ローカルに即時反映
   punchLogs.unshift({ type: currentType, time: timeVal, state: '送信中' });
   renderLogs();
   updateStatus(currentType === '出勤' ? 'in' : 'out');
@@ -373,56 +547,43 @@ async function submitPunch() {
     const res = await fetch(API_URL, {
       method: 'POST',
       body: JSON.stringify({
-        userName:    currentEmp.name,
-        date:        dateStr,
-        day:         dayStr,
-        timeIn:      currentType === '出勤' ? timeVal : '',
-        timeOut:     currentType === '退勤' ? timeVal : '',
-        location:    location,
-        note:        note,
-        workMinutes: 0,
-        fixed:       false
+        userName: currentEmp.name, date: dateStr, day: dayStr,
+        timeIn:   currentType === '出勤' ? timeVal : '',
+        timeOut:  currentType === '退勤' ? timeVal : '',
+        location, note, workMinutes: 0, fixed: false
       })
     });
     const text = await res.text();
     if (text === 'ok') {
       punchLogs[0].state = '記録済';
       renderLogs();
-      showNotice(currentType === '退勤'
-        ? '退勤打刻が完了しました。お疲れ様でした！'
-        : '出勤打刻が完了しました。', 'ok');
-    } else {
-      throw new Error('not ok');
-    }
+      showNotice(currentType === '退勤' ? '退勤打刻が完了しました。お疲れ様でした！' : '出勤打刻が完了しました。', 'ok');
+    } else { throw new Error(); }
   } catch(e) {
     punchLogs[0].state = '未送信';
     renderLogs();
     showNotice('送信に失敗しました。再度お試しください。', 'err');
-    // 状態を元に戻す
-    if (currentType === '出勤') updateStatus('none');
-    else updateStatus('in');
+    updateStatus(currentType === '出勤' ? 'none' : 'in');
   }
 }
 
 // ============================================================
-//  今日のログをスプレッドシートから取得して状態を復元
+//  今日のログ取得
 // ============================================================
 async function loadTodayLogs() {
   if (!currentEmp) return;
-  const today = new Date();
-  const month = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+  const today    = new Date();
+  const month    = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
   const todayStr = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,'0')}/${String(today.getDate()).padStart(2,'0')}`;
   try {
     const res  = await fetch(`${API_URL}?action=getLogs&empName=${encodeURIComponent(currentEmp.name)}&month=${month}`);
     if (!res.ok) return;
     const logs = await res.json();
     if (!Array.isArray(logs)) return;
-
     const todays = logs.filter(l => {
       const d = l.date ? String(l.date) : '';
       return d.startsWith(todayStr) || d.replace(/-/g,'/').startsWith(todayStr);
     });
-
     punchLogs = [];
     todays.forEach(l => {
       const inT  = l.timeIn  ? String(l.timeIn).slice(0,5)  : '';
@@ -430,29 +591,22 @@ async function loadTodayLogs() {
       if (inT)  punchLogs.push({ type:'出勤', time: inT,  state:'記録済' });
       if (outT) punchLogs.push({ type:'退勤', time: outT, state:'記録済' });
     });
-    punchLogs.sort((a,b) => b.time.localeCompare(a.time)); // 新しい順
+    punchLogs.sort((a,b) => b.time.localeCompare(a.time));
     renderLogs();
-
-    // 状態を復元
     const hasOut = todays.some(l => l.timeOut && String(l.timeOut).trim() !== '');
     const hasIn  = todays.some(l => l.timeIn  && String(l.timeIn).trim()  !== '');
-    if (hasOut)      updateStatus('out');
-    else if (hasIn)  updateStatus('in');
-    else             updateStatus('none');
-  } catch(e) {
-    // オフライン等では無視
-  }
+    if (hasOut)     updateStatus('out');
+    else if (hasIn) updateStatus('in');
+    else            updateStatus('none');
+  } catch(e) {}
 }
 
 // ============================================================
-//  UI更新
+//  UI
 // ============================================================
 function renderLogs() {
   const el = document.getElementById('log-body');
-  if (!punchLogs.length) {
-    el.innerHTML = '<div class="log-empty">まだ打刻がありません</div>';
-    return;
-  }
+  if (!punchLogs.length) { el.innerHTML = '<div class="log-empty">まだ打刻がありません</div>'; return; }
   const c = { 出勤:'var(--ok)', 退勤:'var(--t2)' };
   el.innerHTML = punchLogs.map(p =>
     `<div class="log-row">
@@ -465,13 +619,9 @@ function renderLogs() {
 
 function updateStatus(state) {
   punchState = state;
-  const dot = document.getElementById('sdot');
-  const txt = document.getElementById('status-text');
-  const map = {
-    none: ['var(--t3)', '未打刻'],
-    in:   ['var(--ok)', '出勤中'],
-    out:  ['var(--t2)', '退勤済']
-  };
+  const dot  = document.getElementById('sdot');
+  const txt  = document.getElementById('status-text');
+  const map  = { none:['var(--t3)','未打刻'], in:['var(--ok)','出勤中'], out:['var(--t2)','退勤済'] };
   dot.style.background = map[state][0];
   txt.textContent      = map[state][1];
 }
@@ -491,9 +641,6 @@ function showPg(id) {
   if (id === 'record') buildRecord();
 }
 
-// ============================================================
-//  勤怠確認
-// ============================================================
 async function buildRecord() {
   if (!currentEmp) return;
   const today = new Date();
@@ -507,9 +654,9 @@ async function buildRecord() {
     const totalNight = mine.reduce((s,r) => s + (Number(r.nightMin)||0),0) / 60;
     const totalPay   = mine.reduce((s,r) => s + (Number(r.totalPay)||0),0);
     document.getElementById('kpi-grid').innerHTML = [
-      ['実労働時間', totalWork.toFixed(1)+'h',  '休憩除く'],
-      ['残業時間',   totalOt.toFixed(1)+'h',    '1.25倍'],
-      ['深夜労働',   totalNight.toFixed(1)+'h', '22時以降'],
+      ['実労働時間', totalWork.toFixed(1)+'h', '休憩除く'],
+      ['残業時間',   totalOt.toFixed(1)+'h',   '1.25倍'],
+      ['深夜労働',   totalNight.toFixed(1)+'h','22時以降'],
       ['概算給与',   '¥'+Math.round(totalPay).toLocaleString(), '確定前'],
     ].map(([l,v,n]) =>
       `<div class="kpi-card">
