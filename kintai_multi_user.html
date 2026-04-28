@@ -5,102 +5,95 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Xtran 打刻</title>
 <style>
-/* ===================== 基本設定 ===================== */
 :root {
-  --nv: #2b3172;
-  --nv-p: #eef0fa;
-  --nv-m: #3a429e;
-  --ok: #16a34a;
-  --wa: #d97706;
-  --ng: #dc2626;f
-  --t2: #6b7280;
-  --t3: #9ca3af;
-  --bd: rgba(43,49,114,0.13);
-  --bd2: rgba(43,49,114,0.22);
+  --nv:#2b3172;--nv-p:#eef0fa;--nv-m:#3a429e;
+  --ok:#16a34a;--wa:#d97706;--ng:#dc2626;
+  --t2:#6b7280;--t3:#9ca3af;
+  --bd:rgba(43,49,114,0.13);--bd2:rgba(43,49,114,0.22);
 }
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: #f1f3fb; min-height: 100vh; }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;background:#f1f3fb;min-height:100vh}
+.header{background:var(--nv);padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:8px}
+.logo svg{height:20px}
+.greeting{font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px}
+.emp-badge{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:4px 12px;font-size:12px;color:white;cursor:pointer}
+.main{padding:14px;max-width:480px;margin:0 auto}
+.clock-card{background:var(--nv);border-radius:14px;padding:22px 18px;text-align:center;margin-bottom:14px}
+.clock-time{font-size:42px;font-weight:300;color:white;letter-spacing:0.04em;font-variant-numeric:tabular-nums;line-height:1}
+.clock-date{font-size:12px;color:rgba(255,255,255,0.5);margin:6px 0 4px}
+.status-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.1);border-radius:20px;padding:4px 12px;font-size:12px;color:rgba(255,255,255,0.8);margin-bottom:18px}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--t3)}
+.punch-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pbtn{border-radius:10px;padding:14px 8px;font-size:15px;font-weight:500;cursor:pointer;border:none;transition:all 0.15s;letter-spacing:0.03em}
+.pbtn:active{transform:scale(0.96)}
+.pbtn-in{background:white;color:var(--nv)}
+.pbtn-out{background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.9);border:1px solid rgba(255,255,255,0.25)}
+.break-note{margin-top:10px;font-size:11px;color:rgba(255,255,255,0.5)}
+.notice{border-radius:10px;padding:11px 14px;font-size:13px;line-height:1.55;margin-bottom:12px;display:none}
+.notice.ok{background:rgba(22,163,74,0.1);border:1px solid rgba(22,163,74,0.25);color:var(--ok)}
+.notice.err{background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);color:var(--ng)}
+.notice.vis{display:block}
+.section-title{font-size:11px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px}
+.log-card{background:white;border:1px solid var(--bd);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.log-head{display:grid;grid-template-columns:1fr 1fr 1fr;padding:8px 12px;background:var(--nv-p)}
+.log-head span{font-size:11px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:0.05em}
+.log-row{display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 12px;border-top:1px solid var(--bd)}
+.log-row span{font-size:13px;color:var(--t2)}
+.log-row .lt{font-weight:500}
+.log-row .ltime{color:var(--nv-m);font-weight:500}
+.log-empty{padding:16px;text-align:center;font-size:12px;color:var(--t3)}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.kpi-card{background:white;border:1px solid var(--bd);border-radius:10px;padding:12px 14px}
+.kpi-label{font-size:11px;color:var(--t2);margin-bottom:5px}
+.kpi-val{font-size:22px;font-weight:500;color:var(--nv)}
+.kpi-val.sm{font-size:16px}
+.kpi-note{font-size:11px;color:var(--t3);margin-top:3px}
+.bar-list{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+.bar-row{display:flex;align-items:center;gap:10px}
+.bar-label{font-size:12px;color:var(--t2);width:38px;text-align:right;flex-shrink:0}
+.bar-track{flex:1;height:16px;background:var(--nv-p);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;background:var(--nv);border-radius:4px;display:flex;align-items:center;padding-left:8px}
+.bar-val{font-size:10px;color:rgba(255,255,255,0.9)}
 
-/* ===================== ヘッダー ===================== */
-.header { background: var(--nv); padding: 14px 16px 12px; display: flex; align-items: center; justify-content: space-between; }
-.logo { display: flex; align-items: center; gap: 8px; }
-.logo svg { height: 20px; }
-.greeting { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
-.emp-badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: white; cursor: pointer; }
+/* 従業員選択モーダル */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:flex-end}
+.overlay.show{display:flex}
+.modal{background:white;border-radius:16px 16px 0 0;width:100%;padding:16px;max-height:70vh;overflow-y:auto}
+.modal-title{font-size:13px;font-weight:500;color:var(--t2);text-align:center;margin-bottom:14px}
+.emp-btn{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border:1px solid var(--bd);border-radius:10px;background:white;margin-bottom:8px;cursor:pointer;transition:all 0.15s}
+.emp-btn:active{background:var(--nv-p)}
+.emp-av{width:36px;height:36px;border-radius:50%;background:var(--nv);color:white;font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.emp-name{font-size:14px;font-weight:500;color:var(--nv)}
+.emp-role{font-size:12px;color:var(--t3)}
 
-/* ===================== メイン ===================== */
-.main { padding: 14px; max-width: 480px; margin: 0 auto; }
+/* 退勤入力モーダル */
+.checkout-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-end}
+.checkout-overlay.show{display:flex}
+.checkout-modal{background:white;border-radius:16px 16px 0 0;width:100%;padding:20px 16px;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+.checkout-title{font-size:15px;font-weight:500;color:var(--nv);margin-bottom:4px}
+.checkout-sub{font-size:12px;color:var(--t3);margin-bottom:18px}
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;font-weight:500;color:var(--t2);margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.required{background:var(--ng);color:white;font-size:9px;padding:1px 5px;border-radius:3px}
+.form-select,.form-textarea{width:100%;background:var(--nv-p);border:1px solid var(--bd2);border-radius:8px;color:var(--nv);font-size:14px;padding:10px 12px;outline:none;font-family:inherit}
+.form-select:focus,.form-textarea:focus{border-color:var(--nv)}
+.form-textarea{resize:none;height:80px;line-height:1.5}
+.submit-btn{width:100%;background:var(--nv);border:none;color:white;border-radius:10px;padding:14px;font-size:15px;font-weight:500;cursor:pointer;transition:opacity 0.15s;margin-top:4px}
+.submit-btn:active{opacity:0.85}
+.cancel-link{display:block;text-align:center;margin-top:12px;font-size:13px;color:var(--t3);cursor:pointer}
 
-/* ===================== 打刻カード ===================== */
-.clock-card { background: var(--nv); border-radius: 14px; padding: 22px 18px; text-align: center; margin-bottom: 14px; }
-.clock-time { font-size: 42px; font-weight: 300; color: white; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; line-height: 1; }
-.clock-date { font-size: 12px; color: rgba(255,255,255,0.5); margin: 6px 0 4px; }
-.status-pill { display: inline-flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.1); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 18px; }
-.sdot { width: 7px; height: 7px; border-radius: 50%; background: var(--t3); }
-.punch-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.pbtn { border-radius: 10px; padding: 14px 8px; font-size: 15px; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; letter-spacing: 0.03em; }
-.pbtn:active { transform: scale(0.96); }
-.pbtn-in  { background: white; color: var(--nv); }
-.pbtn-out { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.25); }
-.break-note { margin-top: 10px; font-size: 11px; color: rgba(255,255,255,0.5); }
-
-/* ===================== 通知 ===================== */
-.notice { border-radius: 10px; padding: 11px 14px; font-size: 13px; line-height: 1.55; margin-bottom: 12px; display: none; }
-.notice.ok  { background: rgba(22,163,74,0.1);  border: 1px solid rgba(22,163,74,0.25);  color: var(--ok); }
-.notice.err { background: rgba(220,38,38,0.08); border: 1px solid rgba(220,38,38,0.2);   color: var(--ng); }
-.notice.vis { display: block; }
-
-/* ===================== 打刻ログ ===================== */
-.section-title { font-size: 11px; font-weight: 500; color: var(--t3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
-.log-card { background: white; border: 1px solid var(--bd); border-radius: 10px; overflow: hidden; margin-bottom: 14px; }
-.log-head { display: grid; grid-template-columns: 1fr 1fr 1fr; padding: 8px 12px; background: var(--nv-p); }
-.log-head span { font-size: 11px; color: var(--t3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
-.log-row { display: grid; grid-template-columns: 1fr 1fr 1fr; padding: 10px 12px; border-top: 1px solid var(--bd); }
-.log-row span { font-size: 13px; color: var(--t2); }
-.log-row .lt { font-weight: 500; }
-.log-row .ltime { color: var(--nv-m); font-weight: 500; }
-.log-empty { padding: 16px; text-align: center; font-size: 12px; color: var(--t3); }
-
-/* ===================== 勤怠確認タブ ===================== */
-.kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-.kpi-card { background: white; border: 1px solid var(--bd); border-radius: 10px; padding: 12px 14px; }
-.kpi-label { font-size: 11px; color: var(--t2); margin-bottom: 5px; }
-.kpi-val { font-size: 22px; font-weight: 500; color: var(--nv); }
-.kpi-val.sm { font-size: 16px; }
-.kpi-note { font-size: 11px; color: var(--t3); margin-top: 3px; }
-.bar-list { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
-.bar-row { display: flex; align-items: center; gap: 10px; }
-.bar-label { font-size: 12px; color: var(--t2); width: 38px; text-align: right; flex-shrink: 0; }
-.bar-track { flex: 1; height: 16px; background: var(--nv-p); border-radius: 4px; overflow: hidden; }
-.bar-fill  { height: 100%; background: var(--nv); border-radius: 4px; display: flex; align-items: center; padding-left: 8px; }
-.bar-val   { font-size: 10px; color: rgba(255,255,255,0.9); }
-
-/* ===================== 従業員切り替えモーダル ===================== */
-.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: flex-end; }
-.overlay.show { display: flex; }
-.modal { background: white; border-radius: 16px 16px 0 0; width: 100%; padding: 16px; max-height: 70vh; overflow-y: auto; }
-.modal-title { font-size: 13px; font-weight: 500; color: var(--t2); text-align: center; margin-bottom: 14px; }
-.emp-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border: 1px solid var(--bd); border-radius: 10px; background: white; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; }
-.emp-btn:active { background: var(--nv-p); }
-.emp-av { width: 36px; height: 36px; border-radius: 50%; background: var(--nv); color: white; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.emp-name { font-size: 14px; font-weight: 500; color: var(--nv); }
-.emp-role { font-size: 12px; color: var(--t3); }
-
-/* ===================== ボトムタブ ===================== */
-.tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--bd); display: flex; padding-bottom: env(safe-area-inset-bottom); }
-.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px 0 10px; cursor: pointer; gap: 3px; color: var(--t3); transition: color 0.15s; }
-.tab-item svg { width: 22px; height: 22px; }
-.tab-item span { font-size: 10px; }
-.tab-item.active { color: var(--nv); }
-.pb-space { height: 70px; }
-
-/* ===================== ローディング ===================== */
-.loading { text-align: center; padding: 24px; font-size: 13px; color: var(--t3); }
+.tab-bar{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--bd);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0 10px;cursor:pointer;gap:3px;color:var(--t3);transition:color 0.15s}
+.tab-item svg{width:22px;height:22px}
+.tab-item span{font-size:10px}
+.tab-item.active{color:var(--nv)}
+.pb-space{height:70px}
+.loading{text-align:center;padding:24px;font-size:13px;color:var(--t3)}
 </style>
 </head>
 <body>
 
-<!-- ヘッダー -->
 <div class="header">
   <div class="logo">
     <svg viewBox="0 0 120 30" fill="none">
@@ -117,10 +110,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-ser
   <div class="emp-badge" onclick="openEmpModal()" id="emp-badge">読み込み中...</div>
 </div>
 
-<!-- メイン -->
 <div class="main">
-
-  <!-- 打刻ページ -->
   <div id="pg-punch">
     <div class="clock-card">
       <div class="clock-time" id="clock">--:--:--</div>
@@ -131,13 +121,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-ser
       </div>
       <div class="punch-btns">
         <button class="pbtn pbtn-in"  onclick="doPunch('出勤')">出勤</button>
-        <button class="pbtn pbtn-out" onclick="doPunch('退勤')">退勤</button>
+        <button class="pbtn pbtn-out" onclick="openCheckout()">退勤</button>
       </div>
       <div class="break-note">休憩（12:00〜13:00）は自動控除されます</div>
     </div>
-
     <div class="notice" id="notice"></div>
-
     <div class="section-title">本日の打刻履歴</div>
     <div class="log-card">
       <div class="log-head"><span>種別</span><span>時刻</span><span>状態</span></div>
@@ -145,11 +133,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-ser
     </div>
   </div>
 
-  <!-- 勤怠確認ページ -->
   <div id="pg-record" style="display:none">
-    <div class="kpi-grid" id="kpi-grid">
-      <div class="loading">読み込み中...</div>
-    </div>
+    <div class="kpi-grid" id="kpi-grid"><div class="loading">読み込み中...</div></div>
     <div class="section-title">週別実労働時間</div>
     <div class="bar-list" id="bar-list"></div>
   </div>
@@ -157,11 +142,45 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-ser
   <div class="pb-space"></div>
 </div>
 
-<!-- 従業員切り替えモーダル -->
+<!-- 従業員選択モーダル -->
 <div class="overlay" id="overlay" onclick="closeEmpModal()">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-title">従業員を選択してください</div>
     <div id="emp-modal-list"><div class="loading">読み込み中...</div></div>
+  </div>
+</div>
+
+<!-- 退勤入力モーダル -->
+<div class="checkout-overlay" id="checkout-overlay">
+  <div class="checkout-modal">
+    <div class="checkout-title">退勤打刻</div>
+    <div class="checkout-sub">退勤前に本日の業務内容を入力してください</div>
+
+    <div class="form-group">
+      <div class="form-label">
+        作業場所
+        <span class="required">必須</span>
+      </div>
+      <select class="form-select" id="location-select">
+        <option value="">選択してください</option>
+        <option value="本社">本社</option>
+        <option value="テレワーク">テレワーク</option>
+        <option value="客先">客先</option>
+        <option value="外出">外出</option>
+        <option value="その他">その他</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <div class="form-label">
+        業務内容
+        <span class="required">必須</span>
+      </div>
+      <textarea class="form-textarea" id="note-input" placeholder="本日の業務内容を入力してください"></textarea>
+    </div>
+
+    <button class="submit-btn" onclick="submitCheckout()">退勤する</button>
+    <span class="cancel-link" onclick="closeCheckout()">キャンセル</span>
   </div>
 </div>
 
@@ -184,38 +203,24 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-ser
 </div>
 
 <script>
-// ============================================================
-//  設定 — デプロイ後にURLを書き換えてください
-// ============================================================
-const API_URL = 'https://script.google.com/macros/s/AKfycbx2hA7tiRmH6SXBLupyJBjWDcnNMNDRAGb_xA93vIBQnGFKnYxPNjy_yx527n-DBr5F/exec';
+// ★ ここにApps ScriptのURLを入力してください
+const API_URL = 'https://script.google.com/macros/s/AKfycbyxK2sukDVpcK976TNklvxREM9LMftxfcMptTIEeZDON1ISZ78KFK_LM1YJjjwFU4Zr/exec';
 
-// ============================================================
-//  状態管理
-// ============================================================
-let currentEmp  = null;
-let employees   = [];
-let punchLogs   = [];
-let punchState  = 'none'; // 'none' | 'in' | 'out'
+let currentEmp = null;
+let employees  = [];
+let punchLogs  = [];
+let punchState = 'none';
 
-// ============================================================
-//  初期化
-// ============================================================
 window.addEventListener('DOMContentLoaded', async () => {
   tickClock();
   setInterval(tickClock, 1000);
-
-  // ローカルに保存された前回の従業員を復元
   const saved = localStorage.getItem('xtran_emp');
   if (saved) currentEmp = JSON.parse(saved);
-
   await loadEmployees();
   if (currentEmp) updateEmpDisplay();
   loadTodayLogs();
 });
 
-// ============================================================
-//  時計
-// ============================================================
 function tickClock() {
   const n = new Date();
   document.getElementById('clock').textContent = n.toLocaleTimeString('ja-JP');
@@ -227,13 +232,10 @@ function tickClock() {
     h < 10 ? 'おはようございます' : h < 17 ? 'こんにちは' : 'お疲れ様です';
 }
 
-// ============================================================
-//  従業員リストの取得
-// ============================================================
 async function loadEmployees() {
   try {
-    const res  = await fetch(`${API_URL}?action=getEmployees`);
-    employees  = await res.json();
+    const res = await fetch(`${API_URL}?action=getEmployees`);
+    employees = await res.json();
     buildEmpModal();
     if (!currentEmp && employees.length > 0) {
       currentEmp = employees[0];
@@ -245,12 +247,9 @@ async function loadEmployees() {
   }
 }
 
-// ============================================================
-//  従業員モーダル
-// ============================================================
 function buildEmpModal() {
   document.getElementById('emp-modal-list').innerHTML = employees.map(e =>
-    `<button class="emp-btn" onclick="selectEmp(${e.id})">
+    `<button class="emp-btn" onclick="selectEmp('${e.name}')">
       <div class="emp-av">${e.name.slice(0,2)}</div>
       <div style="text-align:left">
         <div class="emp-name">${e.name}</div>
@@ -263,8 +262,8 @@ function buildEmpModal() {
 function openEmpModal()  { document.getElementById('overlay').classList.add('show'); }
 function closeEmpModal() { document.getElementById('overlay').classList.remove('show'); }
 
-function selectEmp(id) {
-  currentEmp = employees.find(e => e.id == id);
+function selectEmp(name) {
+  currentEmp = employees.find(e => e.name === name);
   localStorage.setItem('xtran_emp', JSON.stringify(currentEmp));
   updateEmpDisplay();
   closeEmpModal();
@@ -279,50 +278,67 @@ function updateEmpDisplay() {
   document.getElementById('emp-badge').textContent = currentEmp ? currentEmp.name : '未選択';
 }
 
-// ============================================================
-//  打刻処理
-// ============================================================
-async function doPunch(type) {
+// 退勤モーダルを開く
+function openCheckout() {
   if (!currentEmp) { showNotice('従業員を選択してください', 'err'); return; }
+  if (punchState !== 'in') { showNotice('出勤打刻をしてから退勤してください', 'err'); return; }
+  document.getElementById('location-select').value = '';
+  document.getElementById('note-input').value = '';
+  document.getElementById('checkout-overlay').classList.add('show');
+}
 
-  // 二重打刻チェック
+function closeCheckout() {
+  document.getElementById('checkout-overlay').classList.remove('show');
+}
+
+// 退勤送信
+async function submitCheckout() {
+  const location = document.getElementById('location-select').value;
+  const note     = document.getElementById('note-input').value.trim();
+
+  if (!location) { alert('作業場所を選択してください'); return; }
+  if (!note)     { alert('業務内容を入力してください'); return; }
+
+  closeCheckout();
+  await doPunch('退勤', location, note);
+}
+
+async function doPunch(type, location, note) {
+  if (!currentEmp) { showNotice('従業員を選択してください', 'err'); return; }
   if (type === '出勤' && punchState === 'in') {
     showNotice('すでに出勤打刻済みです', 'err'); return;
   }
-  if (type === '退勤' && punchState !== 'in') {
-    showNotice('出勤打刻をしてから退勤してください', 'err'); return;
-  }
 
-  const t = new Date().toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'});
+  const now = new Date();
+  const t   = now.toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'});
+  const wd  = ['日','月','火','水','木','金','土'];
+  const dateStr = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`;
 
-  // ローカルに即時反映
   punchLogs.unshift({ type, time: t, state: '送信中' });
   renderLogs();
   updateStatus(type === '出勤' ? 'in' : 'out');
 
   try {
-    const now = new Date();
-const wd = ['日','月','火','水','木','金','土'];
-const res = await fetch(API_URL, {
-  method: 'POST',
-  body: JSON.stringify({
-    userName: currentEmp.name,
-    date: `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`,
-    day: wd[now.getDay()],
-    timeIn:  type === '出勤' ? t : '',
-    timeOut: type === '退勤' ? t : '',
-    location: '',
-    note: '',
-    workMinutes: 0,
-    fixed: false
-  })
-});
-const text = await res.text();
-if (text === 'ok') {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        userName: currentEmp.name,
+        date:     dateStr,
+        day:      wd[now.getDay()],
+        timeIn:   type === '出勤' ? t : '',
+        timeOut:  type === '退勤' ? t : '',
+        location: location || '',
+        note:     note     || '',
+        workMinutes: 0,
+        fixed: false
+      })
+    });
+    const text = await res.text();
+    if (text === 'ok') {
       punchLogs[0].state = '記録済';
       renderLogs();
       if (type === '退勤') {
-        showNotice(`退勤打刻が完了しました。お疲れ様でした！\n実労働時間はスプレッドシートに自動記録されます。`, 'ok');
+        showNotice('退勤打刻が完了しました。お疲れ様でした！', 'ok');
       } else {
         showNotice('出勤打刻が完了しました。', 'ok');
       }
@@ -334,37 +350,36 @@ if (text === 'ok') {
   }
 }
 
-// ============================================================
-//  当日ログのロード（ページ起動時）
-// ============================================================
 async function loadTodayLogs() {
   if (!currentEmp) return;
   const today = new Date();
   const month = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
   try {
-    const res  = await fetch(`${API_URL}?action=getLogs&empId=${currentEmp.id}&month=${month}`);
+    const res  = await fetch(`${API_URL}?action=getLogs&empName=${encodeURIComponent(currentEmp.name)}&month=${month}`);
     const logs = await res.json();
-    const todayStr = today.toLocaleDateString('ja-JP', {year:'numeric',month:'2-digit',day:'2-digit'}).replace(/\//g, '/');
-    const todays = logs.filter(l => l.date === todayStr);
-    punchLogs = todays.map(l => ({ type: l.type, time: l.time.slice(0,5), state: '記録済' })).reverse();
+    const todayStr = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,'0')}/${String(today.getDate()).padStart(2,'0')}`;
+    const todays = logs.filter(l => String(l.date).startsWith(todayStr));
+    punchLogs = [];
+    todays.forEach(l => {
+      if (l.timeIn)  punchLogs.push({ type:'出勤', time: String(l.timeIn).slice(0,5),  state:'記録済' });
+      if (l.timeOut) punchLogs.push({ type:'退勤', time: String(l.timeOut).slice(0,5), state:'記録済' });
+    });
+    punchLogs.reverse();
     renderLogs();
-    const lastIn  = todays.find(l => l.type === '出勤');
-    const lastOut = todays.find(l => l.type === '退勤');
-    if (lastOut)      updateStatus('out');
-    else if (lastIn)  updateStatus('in');
-    else              updateStatus('none');
-  } catch(e) { /* オフラインの場合は無視 */ }
+    const hasOut = todays.some(l => l.timeOut);
+    const hasIn  = todays.some(l => l.timeIn);
+    if (hasOut)      updateStatus('out');
+    else if (hasIn)  updateStatus('in');
+    else             updateStatus('none');
+  } catch(e) {}
 }
 
-// ============================================================
-//  UI更新
-// ============================================================
 function renderLogs() {
   const el = document.getElementById('log-body');
   if (!punchLogs.length) {
     el.innerHTML = '<div class="log-empty">まだ打刻がありません</div>'; return;
   }
-  const c = { 出勤: 'var(--ok)', 退勤: 'var(--t2)' };
+  const c = { 出勤:'var(--ok)', 退勤:'var(--t2)' };
   el.innerHTML = punchLogs.map(p =>
     `<div class="log-row">
       <span class="lt" style="color:${c[p.type]||'var(--t2)'}">${p.type}</span>
@@ -376,11 +391,11 @@ function renderLogs() {
 
 function updateStatus(state) {
   punchState = state;
-  const dot  = document.getElementById('sdot');
-  const txt  = document.getElementById('status-text');
-  const map  = { none: ['var(--t3)', '未打刻'], in: ['var(--ok)', '出勤中'], out: ['var(--t2)', '退勤済'] };
+  const dot = document.getElementById('sdot');
+  const txt = document.getElementById('status-text');
+  const map = { none:['var(--t3)','未打刻'], in:['var(--ok)','出勤中'], out:['var(--t2)','退勤済'] };
   dot.style.background = map[state][0];
-  txt.textContent       = map[state][1];
+  txt.textContent      = map[state][1];
 }
 
 function showNotice(msg, type) {
@@ -392,69 +407,39 @@ function showNotice(msg, type) {
 
 function showPg(id) {
   ['punch','record'].forEach(p => {
-    document.getElementById('pg-'+p).style.display    = p === id ? 'block' : 'none';
+    document.getElementById('pg-'+p).style.display = p === id ? 'block' : 'none';
     document.getElementById('tab-'+p).classList.toggle('active', p === id);
   });
   if (id === 'record') buildRecord();
 }
 
-// ============================================================
-//  勤怠確認ページ（月次サマリー表示）
-// ============================================================
 async function buildRecord() {
   if (!currentEmp) return;
-  const today  = new Date();
-  const month  = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+  const today = new Date();
+  const month = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
   try {
     const res  = await fetch(`${API_URL}?action=getSummary&month=${month}`);
     const rows = await res.json();
-    const mine = rows.filter(r => r.empId == currentEmp.id);
-
-    const totalWork  = mine.reduce((s,r) => s + (r.workH  || 0), 0);
-    const totalOt    = mine.reduce((s,r) => s + (r.otH    || 0), 0);
-    const totalNight = mine.reduce((s,r) => s + (r.nightH || 0), 0);
-    const totalPay   = mine.reduce((s,r) => s + (r.totalPay || 0), 0);
-
+    const mine = rows.filter(r => r.name === currentEmp.name);
+    const totalWork  = mine.reduce((s,r) => s + (Number(r.workMin)||0), 0) / 60;
+    const totalOt    = mine.reduce((s,r) => s + (Number(r.otMin)||0),   0) / 60;
+    const totalNight = mine.reduce((s,r) => s + (Number(r.nightMin)||0),0) / 60;
+    const totalPay   = mine.reduce((s,r) => s + (Number(r.totalPay)||0),0);
     document.getElementById('kpi-grid').innerHTML = [
-      ['実労働時間',  totalWork.toFixed(1)+'h',  '休憩除く'],
-      ['残業時間',    totalOt.toFixed(1)+'h',    '1.25倍'],
-      ['深夜労働',    totalNight.toFixed(1)+'h', '22時以降'],
-      ['概算給与',    '¥'+Math.round(totalPay).toLocaleString(), '確定前'],
+      ['実労働時間', totalWork.toFixed(1)+'h',  '休憩除く'],
+      ['残業時間',   totalOt.toFixed(1)+'h',    '1.25倍'],
+      ['深夜労働',   totalNight.toFixed(1)+'h', '22時以降'],
+      ['概算給与',   '¥'+Math.round(totalPay).toLocaleString(), '確定前'],
     ].map(([l,v,n]) =>
       `<div class="kpi-card">
         <div class="kpi-label">${l}</div>
-        <div class="kpi-val${v.length > 8 ? ' sm' : ''}">${v}</div>
+        <div class="kpi-val${v.length>8?' sm':''}">${v}</div>
         <div class="kpi-note">${n}</div>
-      </div>`
-    ).join('');
-
-    // 週別バー（直近5週）
-    const weeks = groupByWeek(mine);
-    const mx = Math.max(...weeks.map(w=>w.h), 1);
-    document.getElementById('bar-list').innerHTML = weeks.map(w =>
-      `<div class="bar-row">
-        <div class="bar-label">${w.label}</div>
-        <div class="bar-track">
-          <div class="bar-fill" style="width:${Math.round(w.h/mx*100)}%">
-            <span class="bar-val">${w.h.toFixed(1)}h</span>
-          </div>
-        </div>
       </div>`
     ).join('');
   } catch(e) {
     document.getElementById('kpi-grid').innerHTML = '<div class="log-empty">データを取得できませんでした</div>';
   }
-}
-
-function groupByWeek(rows) {
-  const map = {};
-  rows.forEach(r => {
-    const d   = new Date(r.date.replace(/\//g, '-'));
-    const w   = Math.ceil(d.getDate() / 7);
-    const key = `第${w}週`;
-    map[key]  = (map[key] || 0) + (r.workH || 0);
-  });
-  return Object.entries(map).map(([label, h]) => ({ label, h })).slice(-5);
 }
 </script>
 </body>
