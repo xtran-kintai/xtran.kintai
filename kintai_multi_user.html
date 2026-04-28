@@ -5,12 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Xtran 打刻</title>
 <style>
-:root {
-  --nv:#2b3172;--nv-p:#eef0fa;--nv-m:#3a429e;
-  --ok:#16a34a;--wa:#d97706;--ng:#dc2626;
-  --t2:#6b7280;--t3:#9ca3af;
-  --bd:rgba(43,49,114,0.13);--bd2:rgba(43,49,114,0.22);
-}
+:root{--nv:#2b3172;--nv-p:#eef0fa;--nv-m:#3a429e;--ok:#16a34a;--wa:#d97706;--ng:#dc2626;--t2:#6b7280;--t3:#9ca3af;--bd:rgba(43,49,114,0.13);--bd2:rgba(43,49,114,0.22)}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;background:#f1f3fb;min-height:100vh}
 .header{background:var(--nv);padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between}
@@ -55,8 +50,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .bar-track{flex:1;height:16px;background:var(--nv-p);border-radius:4px;overflow:hidden}
 .bar-fill{height:100%;background:var(--nv);border-radius:4px;display:flex;align-items:center;padding-left:8px}
 .bar-val{font-size:10px;color:rgba(255,255,255,0.9)}
-
-/* 従業員選択モーダル */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:flex-end}
 .overlay.show{display:flex}
 .modal{background:white;border-radius:16px 16px 0 0;width:100%;padding:16px;max-height:70vh;overflow-y:auto}
@@ -66,23 +59,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .emp-av{width:36px;height:36px;border-radius:50%;background:var(--nv);color:white;font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .emp-name{font-size:14px;font-weight:500;color:var(--nv)}
 .emp-role{font-size:12px;color:var(--t3)}
-
-/* 退勤入力モーダル */
-.checkout-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-end}
-.checkout-overlay.show{display:flex}
-.checkout-modal{background:white;border-radius:16px 16px 0 0;width:100%;padding:20px 16px;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
-.checkout-title{font-size:15px;font-weight:500;color:var(--nv);margin-bottom:4px}
-.checkout-sub{font-size:12px;color:var(--t3);margin-bottom:18px}
-.form-group{margin-bottom:14px}
+.punch-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-end}
+.punch-overlay.show{display:flex}
+.punch-modal{background:white;border-radius:16px 16px 0 0;width:100%;padding:20px 16px;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+.punch-modal-title{font-size:15px;font-weight:500;color:var(--nv);margin-bottom:4px}
+.punch-modal-sub{font-size:12px;color:var(--t3);margin-bottom:16px}
+.form-group{margin-bottom:12px}
 .form-label{font-size:12px;font-weight:500;color:var(--t2);margin-bottom:6px;display:flex;align-items:center;gap:4px}
 .required{background:var(--ng);color:white;font-size:9px;padding:1px 5px;border-radius:3px}
-.form-select,.form-textarea{width:100%;background:var(--nv-p);border:1px solid var(--bd2);border-radius:8px;color:var(--nv);font-size:14px;padding:10px 12px;outline:none;font-family:inherit}
-.form-select:focus,.form-textarea:focus{border-color:var(--nv)}
+.optional{background:var(--t3);color:white;font-size:9px;padding:1px 5px;border-radius:3px}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--nv-p);border:1px solid var(--bd2);border-radius:8px;color:var(--nv);font-size:14px;padding:10px 12px;outline:none;font-family:inherit}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--nv)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .form-textarea{resize:none;height:80px;line-height:1.5}
 .submit-btn{width:100%;background:var(--nv);border:none;color:white;border-radius:10px;padding:14px;font-size:15px;font-weight:500;cursor:pointer;transition:opacity 0.15s;margin-top:4px}
 .submit-btn:active{opacity:0.85}
 .cancel-link{display:block;text-align:center;margin-top:12px;font-size:13px;color:var(--t3);cursor:pointer}
-
+.correction-note{background:rgba(217,119,6,0.08);border:1px solid rgba(217,119,6,0.2);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--wa);margin-bottom:12px;line-height:1.5}
 .tab-bar{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--bd);display:flex;padding-bottom:env(safe-area-inset-bottom)}
 .tab-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0 10px;cursor:pointer;gap:3px;color:var(--t3);transition:color 0.15s}
 .tab-item svg{width:22px;height:22px}
@@ -120,8 +113,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
         <span id="status-text">未打刻</span>
       </div>
       <div class="punch-btns">
-        <button class="pbtn pbtn-in"  onclick="doPunch('出勤')">出勤</button>
-        <button class="pbtn pbtn-out" onclick="openCheckout()">退勤</button>
+        <button class="pbtn pbtn-in" onclick="openPunchModal('出勤')">出勤</button>
+        <button class="pbtn pbtn-out" onclick="openPunchModal('退勤')">退勤</button>
       </div>
       <div class="break-note">休憩（12:00〜13:00）は自動控除されます</div>
     </div>
@@ -150,37 +143,47 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
   </div>
 </div>
 
-<!-- 退勤入力モーダル -->
-<div class="checkout-overlay" id="checkout-overlay">
-  <div class="checkout-modal">
-    <div class="checkout-title">退勤打刻</div>
-    <div class="checkout-sub">退勤前に本日の業務内容を入力してください</div>
+<!-- 打刻モーダル（出勤・退勤共通） -->
+<div class="punch-overlay" id="punch-overlay">
+  <div class="punch-modal">
+    <div class="punch-modal-title" id="punch-modal-title">出勤打刻</div>
+    <div class="punch-modal-sub" id="punch-modal-sub">打刻内容を確認してください</div>
 
-    <div class="form-group">
-      <div class="form-label">
-        作業場所
-        <span class="required">必須</span>
-      </div>
-      <select class="form-select" id="location-select">
-        <option value="">選択してください</option>
-        <option value="本社">本社</option>
-        <option value="テレワーク">テレワーク</option>
-        <option value="客先">客先</option>
-        <option value="外出">外出</option>
-        <option value="その他">その他</option>
-      </select>
+    <div id="correction-note" class="correction-note" style="display:none">
+      打刻漏れの修正を行っています。日付・時刻を正しく入力してください。
     </div>
 
-    <div class="form-group">
-      <div class="form-label">
-        業務内容
-        <span class="required">必須</span>
+    <div class="form-row" style="margin-bottom:12px">
+      <div class="form-group" style="margin:0">
+        <div class="form-label">日付 <span class="required">必須</span></div>
+        <input type="date" class="form-input" id="punch-date">
       </div>
-      <textarea class="form-textarea" id="note-input" placeholder="本日の業務内容を入力してください"></textarea>
+      <div class="form-group" style="margin:0">
+        <div class="form-label">時刻 <span class="required">必須</span></div>
+        <input type="time" class="form-input" id="punch-time">
+      </div>
     </div>
 
-    <button class="submit-btn" onclick="submitCheckout()">退勤する</button>
-    <span class="cancel-link" onclick="closeCheckout()">キャンセル</span>
+    <div id="checkout-fields" style="display:none">
+      <div class="form-group">
+        <div class="form-label">作業場所 <span class="required">必須</span></div>
+        <select class="form-select" id="location-select">
+          <option value="">選択してください</option>
+          <option value="本社">本社</option>
+          <option value="テレワーク">テレワーク</option>
+          <option value="客先">客先</option>
+          <option value="外出">外出</option>
+          <option value="その他">その他</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">業務内容 <span class="required">必須</span></div>
+        <textarea class="form-textarea" id="note-input" placeholder="本日の業務内容を入力してください"></textarea>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="punch-submit-btn" onclick="submitPunch()">出勤する</button>
+    <span class="cancel-link" onclick="closePunchModal()">キャンセル</span>
   </div>
 </div>
 
@@ -204,12 +207,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 
 <script>
 // ★ ここにApps ScriptのURLを入力してください
-const API_URL = 'https://script.google.com/macros/s/AKfycbyg0MzrzOMZn52NPEfiYK_hT04PDcZ_VvLBPLh_k4O8YokH_y9bnMeIS9g4dVYZNtxB/exec';
+const API_URL = 'ここにApps ScriptのウェブアプリURLを貼り付け';
 
-let currentEmp = null;
-let employees  = [];
-let punchLogs  = [];
-let punchState = 'none';
+let currentEmp  = null;
+let employees   = [];
+let punchLogs   = [];
+let punchState  = 'none';
+let currentType = '出勤';
 
 window.addEventListener('DOMContentLoaded', async () => {
   tickClock();
@@ -243,7 +247,7 @@ async function loadEmployees() {
       updateEmpDisplay();
     }
   } catch(e) {
-    showNotice('従業員リストの取得に失敗しました。接続を確認してください。', 'err');
+    showNotice('従業員リストの取得に失敗しました。', 'err');
   }
 }
 
@@ -278,75 +282,115 @@ function updateEmpDisplay() {
   document.getElementById('emp-badge').textContent = currentEmp ? currentEmp.name : '未選択';
 }
 
-// 退勤モーダルを開く
-function openCheckout() {
-  if (!currentEmp) { showNotice('従業員を選択してください', 'err'); return; }
-  if (punchState !== 'in') { showNotice('出勤打刻をしてから退勤してください', 'err'); return; }
-  document.getElementById('location-select').value = '';
-  document.getElementById('note-input').value = '';
-  document.getElementById('checkout-overlay').classList.add('show');
-}
-
-function closeCheckout() {
-  document.getElementById('checkout-overlay').classList.remove('show');
-}
-
-// 退勤送信
-async function submitCheckout() {
-  const location = document.getElementById('location-select').value;
-  const note     = document.getElementById('note-input').value.trim();
-
-  if (!location) { alert('作業場所を選択してください'); return; }
-  if (!note)     { alert('業務内容を入力してください'); return; }
-
-  closeCheckout();
-  await doPunch('退勤', location, note);
-}
-
-async function doPunch(type, location, note) {
+// 打刻モーダルを開く
+function openPunchModal(type) {
   if (!currentEmp) { showNotice('従業員を選択してください', 'err'); return; }
   if (type === '出勤' && punchState === 'in') {
     showNotice('すでに出勤打刻済みです', 'err'); return;
   }
+  if (type === '退勤' && punchState !== 'in') {
+    showNotice('出勤打刻をしてから退勤してください', 'err'); return;
+  }
 
+  currentType = type;
+
+  // 現在日時をデフォルト値としてセット
   const now = new Date();
-  const t   = now.toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'});
-  const wd  = ['日','月','火','水','木','金','土'];
-  const dateStr = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`;
+  const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 
-  punchLogs.unshift({ type, time: t, state: '送信中' });
+  document.getElementById('punch-date').value = dateStr;
+  document.getElementById('punch-time').value = timeStr;
+  document.getElementById('punch-modal-title').textContent = type + '打刻';
+  document.getElementById('punch-submit-btn').textContent = type + 'する';
+
+  // 退勤の場合は作業場所・業務内容欄を表示
+  const isCheckout = type === '退勤';
+  document.getElementById('checkout-fields').style.display = isCheckout ? 'block' : 'none';
+  if (isCheckout) {
+    document.getElementById('location-select').value = '';
+    document.getElementById('note-input').value = '';
+  }
+
+  // 今日以外の日付かどうかで修正モードのメモを表示
+  document.getElementById('correction-note').style.display = 'none';
+
+  document.getElementById('punch-overlay').classList.add('show');
+}
+
+function closePunchModal() {
+  document.getElementById('punch-overlay').classList.remove('show');
+}
+
+// 日付が変わったら修正モードのメモを表示
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('punch-date').addEventListener('change', function() {
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    const isCorrection = this.value !== todayStr;
+    document.getElementById('correction-note').style.display = isCorrection ? 'block' : 'none';
+  });
+});
+
+async function submitPunch() {
+  const dateVal = document.getElementById('punch-date').value;
+  const timeVal = document.getElementById('punch-time').value;
+
+  if (!dateVal) { alert('日付を入力してください'); return; }
+  if (!timeVal) { alert('時刻を入力してください'); return; }
+
+  // 日付を yyyy/MM/dd 形式に変換
+  const dateParts = dateVal.split('-');
+  const dateStr   = `${dateParts[0]}/${dateParts[1]}/${dateParts[2]}`;
+  const d         = new Date(dateVal);
+  const wd        = ['日','月','火','水','木','金','土'];
+  const dayStr    = wd[d.getDay()];
+
+  let location = '';
+  let note     = '';
+
+  if (currentType === '退勤') {
+    location = document.getElementById('location-select').value;
+    note     = document.getElementById('note-input').value.trim();
+    if (!location) { alert('作業場所を選択してください'); return; }
+    if (!note)     { alert('業務内容を入力してください'); return; }
+  }
+
+  closePunchModal();
+
+  punchLogs.unshift({ type: currentType, time: timeVal, state: '送信中' });
   renderLogs();
-  updateStatus(type === '出勤' ? 'in' : 'out');
+  updateStatus(currentType === '出勤' ? 'in' : 'out');
 
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
       body: JSON.stringify({
-        userName: currentEmp.name,
-        date:     dateStr,
-        day:      wd[now.getDay()],
-        timeIn:   type === '出勤' ? t : '',
-        timeOut:  type === '退勤' ? t : '',
-        location: location || '',
-        note:     note     || '',
+        userName:    currentEmp.name,
+        date:        dateStr,
+        day:         dayStr,
+        timeIn:      currentType === '出勤' ? timeVal : '',
+        timeOut:     currentType === '退勤' ? timeVal : '',
+        location:    location,
+        note:        note,
         workMinutes: 0,
-        fixed: false
+        fixed:       false
       })
     });
     const text = await res.text();
     if (text === 'ok') {
       punchLogs[0].state = '記録済';
       renderLogs();
-      if (type === '退勤') {
-        showNotice('退勤打刻が完了しました。お疲れ様でした！', 'ok');
-      } else {
-        showNotice('出勤打刻が完了しました。', 'ok');
-      }
+      showNotice(currentType === '退勤'
+        ? '退勤打刻が完了しました。お疲れ様でした！'
+        : '出勤打刻が完了しました。', 'ok');
+    } else {
+      throw new Error('not ok');
     }
   } catch(e) {
     punchLogs[0].state = '未送信';
     renderLogs();
-    showNotice('サーバーへの送信に失敗しました。Wi-Fi / 電波を確認してください。', 'err');
+    showNotice('送信に失敗しました。再度お試しください。', 'err');
   }
 }
 
