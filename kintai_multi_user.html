@@ -585,9 +585,17 @@ async function loadTodayLogs() {
     const logs = await res.json();
     if (!Array.isArray(logs)) return;
     const todays = logs.filter(l => {
-      const d = l.date ? String(l.date) : '';
-      return d.startsWith(todayStr) || d.replace(/-/g,'/').startsWith(todayStr);
-    });
+      if (!l.date) return false;
+      const d = new Date(l.date);
+      const dJST = new Date(d.getTime() + 9*60*60*1000);
+      const jy = dJST.getUTCFullYear();
+      const jm = String(dJST.getUTCMonth()+1).padStart(2,'0');
+      const jd = String(dJST.getUTCDate()).padStart(2,'0');
+      const today = new Date();
+      return jy === today.getFullYear() &&
+         jm === String(today.getMonth()+1).padStart(2,'0') &&
+         jd === String(today.getDate()).padStart(2,'0');
+});
     punchLogs = [];
     todays.forEach(l => {
       const inT  = l.timeIn  ? String(l.timeIn).slice(0,5)  : '';
