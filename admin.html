@@ -448,11 +448,11 @@ function refreshDashboard() {
   const totalOt   = summaryData.reduce((s,r)=>s+(Number(r.otMin)||0),0);
   const totalPay  = summaryData.reduce((s,r)=>s+(Number(r.totalPay)||0),0);
   const today = new Date();
-  const todayStr = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,'0')}/${String(today.getDate()).padStart(2,'0')}`;
+  const todayStr = today.toISOString().slice(0,10); // 例: '2026-04-30'
   let attendCount = 0;
   employees.forEach(e => {
   const logs = logsData[e.name] || [];
-  const todayLog = logs.find(l => String(l.date).startsWith(todayStr) || String(l.date).replace(/-/g,'/').startsWith(todayStr));
+  const todayLog = logs.find(l => String(l.date).startsWith(todayStr));
   if (todayLog && todayLog.timeIn) attendCount++;
   });
   document.getElementById('k-today').textContent = attendCount + ' / ' + employees.length + '名';
