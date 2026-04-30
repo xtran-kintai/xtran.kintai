@@ -598,8 +598,21 @@ async function loadTodayLogs() {
 });
     punchLogs = [];
     todays.forEach(l => {
-      const inT  = l.timeIn  ? String(l.timeIn).slice(0,5)  : '';
-      const outT = l.timeOut ? String(l.timeOut).slice(0,5) : '';
+      const formatTime = (t) => {
+  if (!t) return '';
+  const str = String(t);
+  // HH:mm形式ならそのまま
+  if (/^\d{2}:\d{2}/.test(str)) return str.slice(0,5);
+  // Date形式の場合はJST変換
+  const d = new Date(t);
+  if (!isNaN(d)) {
+    const jst = new Date(d.getTime() + 9*60*60*1000);
+    return String(jst.getUTCHours()).padStart(2,'0') + ':' + String(jst.getUTCMinutes()).padStart(2,'0');
+  }
+  return str.slice(0,5);
+      };
+const inT  = formatTime(l.timeIn);
+const outT = formatTime(l.timeOut);
       if (inT)  punchLogs.push({ type:'出勤', time: inT,  state:'記録済' });
       if (outT) punchLogs.push({ type:'退勤', time: outT, state:'記録済' });
     });
