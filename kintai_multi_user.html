@@ -255,6 +255,10 @@ let pinFirst    = ''; // 初回登録時の1回目PIN
 window.addEventListener('DOMContentLoaded', async () => {
   tickClock();
   setInterval(tickClock, 1000);
+  // 5分ごとに今日のログを再取得して状態を復元
+setInterval(async () => {
+  if (currentEmp) await loadTodayLogs();
+}, 5 * 60 * 1000);
   const saved = localStorage.getItem('xtran_emp');
   if (saved) { try { currentEmp = JSON.parse(saved); } catch(e) {} }
   await loadEmployees();
