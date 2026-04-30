@@ -448,13 +448,26 @@ function refreshDashboard() {
   const totalOt   = summaryData.reduce((s,r)=>s+(Number(r.otMin)||0),0);
   const totalPay  = summaryData.reduce((s,r)=>s+(Number(r.totalPay)||0),0);
   const today = new Date();
-  const todayStr = today.toISOString().slice(0,10); // 例: '2026-04-30'
+  const todayY = today.getFullYear();
+  const todayM = String(today.getMonth()+1).padStart(2,'0');
+  const todayD = String(today.getDate()).padStart(2,'0');
   let attendCount = 0;
   employees.forEach(e => {
   const logs = logsData[e.name] || [];
-  const todayLog = logs.find(l => String(l.date).startsWith(todayStr));
-  if (todayLog && todayLog.timeIn) attendCount++;
+  const todayLog = logs.find(l => {
+    const d = new Date(l.date);
+    const ly = d.getFullYear();
+    const lm = String(d.getMonth()+1).padStart(2,'0');
+    const ld = String(d.getDate()).padStart(2,'0');
+    // タイムゾーン補正（+9時間）
+    const dJST = new Date(d.getTime() + 9*60*60*1000);
+    const jy = dJST.getUTCFullYear();
+    const jm = String(dJST.getUTCMonth()+1).padStart(2,'0');
+    const jd = String(dJST.getUTCDate()).padStart(2,'0');
+    return (jy==todayY && jm==todayM && jd==todayD);
   });
+  if (todayLog && todayLog.timeIn) attendCount++;
+});
   document.getElementById('k-today').textContent = attendCount + ' / ' + employees.length + '名';
   document.getElementById('k-work').textContent  = (totalWork/60).toFixed(1)+'h';
   document.getElementById('k-ot').textContent    = (totalOt/60).toFixed(1)+'h';
