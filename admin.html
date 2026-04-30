@@ -146,6 +146,34 @@ body{background:var(--nv-pp);color:var(--t1);min-height:100vh;display:flex;flex-
 /* 通知 */
 .toast{position:fixed;bottom:20px;right:20px;background:var(--nv);color:white;border-radius:8px;padding:10px 16px;font-size:13px;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none}
 .toast.show{opacity:1}
+
+/* ボトムナビ（スマホ用） */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--bd);z-index:50;padding-bottom:env(safe-area-inset-bottom)}
+.bottom-nav-inner{display:flex}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0 10px;cursor:pointer;gap:3px;color:var(--t3);transition:color 0.15s;font-size:10px;border:none;background:transparent}
+.bnav-item svg{width:20px;height:20px}
+.bnav-item.active{color:var(--nv)}
+.pb-space{display:none;height:60px}
+
+/* スマホ用メディアクエリ */
+@media(max-width:640px){
+  .header{padding:0 14px;height:50px}
+  .header-sub{display:none}
+  .sidebar{display:none}
+  .bottom-nav{display:block}
+  .pb-space{display:block}
+  .content{padding:12px 14px}
+  .kpi-grid{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  .kpi{padding:10px 12px}
+  .kpi-val{font-size:18px}
+  .kpi-val.sm{font-size:13px}
+  .grid2{grid-template-columns:1fr;gap:10px}
+  .form-row{grid-template-columns:1fr}
+  .tbl{font-size:11px}
+  .tbl th,.tbl td{padding:7px 8px}
+  .hbtn span{display:none}
+  .month-select{font-size:11px;padding:4px 7px}
+}
 </style>
 </head>
 <body>
@@ -330,6 +358,29 @@ body{background:var(--nv-pp);color:var(--t1);min-height:100vh;display:flex;flex-
 
 <div class="toast" id="toast"></div>
 
+<!-- ボトムナビ（スマホ用） -->
+<div class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button class="bnav-item active" id="bnav-dashboard" onclick="showPage('dashboard',null);setBnav('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      ダッシュボード
+    </button>
+    <button class="bnav-item" id="bnav-report" onclick="showPage('report',null);setBnav('report')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+      レポート
+    </button>
+    <button class="bnav-item" id="bnav-employees" onclick="showPage('employees',null);setBnav('employees')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      従業員
+    </button>
+    <button class="bnav-item" id="bnav-correction" onclick="showPage('correction',null);setBnav('correction')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      打刻修正
+    </button>
+  </div>
+</div>
+<div class="pb-space"></div>
+
 <script>
 // ★ Apps ScriptのURLを入力してください
 const API_URL = 'https://script.google.com/macros/s/AKfycbxAAMDA8tweSwkqB8ccQXrDHQAVt4MY9_Oz5NNxQF7fSdpxAy_95tGz8Ki_POUBKuCT/exec';
@@ -447,28 +498,7 @@ function refreshDashboard() {
   const totalWork = summaryData.reduce((s,r)=>s+(Number(r.workMin)||0),0);
   const totalOt   = summaryData.reduce((s,r)=>s+(Number(r.otMin)||0),0);
   const totalPay  = summaryData.reduce((s,r)=>s+(Number(r.totalPay)||0),0);
-  const today = new Date();
-  const todayY = today.getFullYear();
-  const todayM = String(today.getMonth()+1).padStart(2,'0');
-  const todayD = String(today.getDate()).padStart(2,'0');
-  let attendCount = 0;
-  employees.forEach(e => {
-  const logs = logsData[e.name] || [];
-  const todayLog = logs.find(l => {
-    const d = new Date(l.date);
-    const ly = d.getFullYear();
-    const lm = String(d.getMonth()+1).padStart(2,'0');
-    const ld = String(d.getDate()).padStart(2,'0');
-    // タイムゾーン補正（+9時間）
-    const dJST = new Date(d.getTime() + 9*60*60*1000);
-    const jy = dJST.getUTCFullYear();
-    const jm = String(dJST.getUTCMonth()+1).padStart(2,'0');
-    const jd = String(dJST.getUTCDate()).padStart(2,'0');
-    return (jy==todayY && jm==todayM && jd==todayD);
-  });
-  if (todayLog && todayLog.timeIn) attendCount++;
-});
-  document.getElementById('k-today').textContent = attendCount + ' / ' + employees.length + '名';
+  document.getElementById('k-today').textContent = '- / '+employees.length+'名';
   document.getElementById('k-work').textContent  = (totalWork/60).toFixed(1)+'h';
   document.getElementById('k-ot').textContent    = (totalOt/60).toFixed(1)+'h';
   document.getElementById('k-pay').textContent   = yen(totalPay);
@@ -723,6 +753,12 @@ function exportCSV() {
 // ============================================================
 //  ページ切替
 // ============================================================
+function setBnav(id) {
+  document.querySelectorAll(".bnav-item").forEach(b=>b.classList.remove("active"));
+  const el = document.getElementById("bnav-"+id);
+  if(el) el.classList.add("active");
+}
+
 function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(t=>t.classList.remove('active'));
