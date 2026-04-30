@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xtran 管理者画面</title>
+<link rel="icon" href="icon-192.png">
+<style>
+:root{
+  --nv:#2b3172;--nv-d:#1e2456;--nv-m:#3a429e;--nv-p:#eef0fa;--nv-pp:#f7f8fd;
+  --ok:#16a34a;--ok-p:rgba(22,163,74,0.08);--wa:#d97706;--wa-p:rgba(217,119,6,0.08);
+  --ng:#dc2626;--ng-p:rgba(220,38,38,0.07);
+  --t1:#1a1f3a;--t2:#6b7280;--t3:#9ca3af;
+  --bd:rgba(43,49,114,0.1);--bd2:rgba(43,49,114,0.2);
+  --shadow:0 1px 4px rgba(43,49,114,0.08);
+  --shadow-md:0 4px 16px rgba(43,49,114,0.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Hiragino Kaku Gothic Pro','Yu Gothic UI',sans-serif}
+body{background:var(--nv-pp);color:var(--t1);min-height:100vh;display:flex;flex-direction:column}
+
+/* ヘッダー */
+.header{background:var(--nv);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,0.15);position:sticky;top:0;z-index:50}
+.header-left{display:flex;align-items:center;gap:12px}
+.header-logo{height:28px;width:28px;border-radius:6px}
+.header-title{font-size:15px;font-weight:500;color:white}
+.header-sub{font-size:11px;color:rgba(255,255,255,0.45);margin-left:2px}
+.header-right{display:flex;align-items:center;gap:10px}
+.month-select{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:7px;color:white;font-size:12px;padding:5px 10px;cursor:pointer}
+.month-select option{background:var(--nv);color:white}
+.hbtn{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:7px;color:rgba(255,255,255,0.85);font-size:12px;padding:5px 12px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:5px}
+.hbtn:hover{background:rgba(255,255,255,0.2)}
+
+/* レイアウト */
+.layout{display:flex;flex:1}
+.sidebar{width:200px;background:white;border-right:1px solid var(--bd);display:flex;flex-direction:column;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;flex-shrink:0}
+.sb-section{font-size:10px;font-weight:500;color:var(--t3);padding:14px 16px 4px;text-transform:uppercase;letter-spacing:0.07em}
+.sb-item{display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer;font-size:13px;color:var(--t2);transition:all 0.15s;border-left:3px solid transparent}
+.sb-item svg{width:15px;height:15px;flex-shrink:0}
+.sb-item:hover{background:var(--nv-p);color:var(--nv)}
+.sb-item.active{background:var(--nv-p);color:var(--nv);border-left-color:var(--nv);font-weight:500}
+.sb-divider{border:none;border-top:1px solid var(--bd);margin:6px 0}
+
+.content{flex:1;padding:20px 24px;overflow-y:auto;min-width:0}
+.page{display:none}.page.active{display:block}
+
+/* KPIカード */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:white;border:1px solid var(--bd);border-radius:10px;padding:14px 16px;box-shadow:var(--shadow)}
+.kpi-label{font-size:11px;color:var(--t2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+.kpi-val{font-size:22px;font-weight:500;color:var(--nv)}
+.kpi-val.sm{font-size:16px}
+.kpi-note{font-size:11px;color:var(--t3);margin-top:3px}
+.kpi-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;margin-top:4px}
+.badge-ok{background:var(--ok-p);color:var(--ok)}
+.badge-wa{background:var(--wa-p);color:var(--wa)}
+.badge-ng{background:var(--ng-p);color:var(--ng)}
+.badge-nv{background:var(--nv-p);color:var(--nv)}
+
+/* セクション */
+.section-title{font-size:11px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px}
+.card{background:white;border:1px solid var(--bd);border-radius:10px;box-shadow:var(--shadow)}
+.card-header{padding:12px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:13px;font-weight:500;color:var(--t1)}
+.card-body{padding:14px 16px}
+
+/* グリッド */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+
+/* テーブル */
+.tbl-wrap{border:1px solid var(--bd);border-radius:10px;overflow:hidden;background:white;box-shadow:var(--shadow)}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{padding:9px 12px;text-align:left;font-size:10px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--bd);background:var(--nv-p)}
+.tbl td{padding:9px 12px;color:var(--t2);border-bottom:1px solid var(--bd)}
+.tbl td:first-child{color:var(--t1);font-weight:500}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--nv-pp)}
+.tbl td.hi{color:var(--nv);font-weight:500}
+.tbl td.wa{color:var(--wa)}
+.tbl td.ng{color:var(--ng)}
+.tbl td.ok{color:var(--ok)}
+
+/* 従業員リスト */
+.emp-list{display:flex;flex-direction:column;gap:6px}
+.emp-row{display:flex;align-items:center;gap:10px;padding:10px 13px;border:1px solid var(--bd);border-radius:8px;cursor:pointer;transition:all 0.15s;background:white}
+.emp-row:hover{border-color:var(--bd2);background:var(--nv-p)}
+.emp-row.sel{border-color:var(--nv);background:var(--nv-p)}
+.av{width:32px;height:32px;border-radius:50%;background:var(--nv);color:white;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.av.lite{background:var(--nv-p);color:var(--nv)}
+.ei{flex:1;min-width:0}
+.en{font-size:13px;font-weight:500;color:var(--t1)}
+.er{font-size:11px;color:var(--t3)}
+.edot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot-ok{background:var(--ok)}
+.dot-wa{background:var(--wa)}
+.dot-off{background:var(--t3)}
+.eh{text-align:right;flex-shrink:0}
+.eh .hh{font-size:13px;font-weight:500;color:var(--t1)}
+.eh .ot{font-size:10px;color:var(--wa)}
+
+/* バーチャート */
+.bar-list{display:flex;flex-direction:column;gap:6px}
+.bar-row{display:flex;align-items:center;gap:8px}
+.bar-label{font-size:11px;color:var(--t2);width:28px;text-align:right;flex-shrink:0}
+.bar-track{flex:1;height:16px;background:var(--nv-p);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;background:var(--nv);border-radius:3px;display:flex;align-items:center;padding-left:6px;transition:width 0.5s}
+.bar-fill-v{font-size:9px;color:rgba(255,255,255,0.9)}
+
+/* 給与内訳 */
+.pay-block{display:flex;flex-direction:column;gap:5px}
+.pay-row{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:6px;background:var(--nv-p)}
+.pay-row.total{background:var(--nv)}
+.pay-label{font-size:12px;color:var(--t2)}
+.pay-val{font-size:12px;font-weight:500;color:var(--t1)}
+.pay-row.total .pay-label{color:rgba(255,255,255,0.65)}
+.pay-row.total .pay-val{color:white;font-size:14px}
+
+/* ボタン */
+.btn{padding:7px 14px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid;transition:all 0.15s}
+.btn-primary{background:var(--nv);border-color:var(--nv);color:white}
+.btn-primary:hover{opacity:0.85}
+.btn-ghost{background:transparent;border-color:var(--bd2);color:var(--t2)}
+.btn-ghost:hover{border-color:var(--nv);color:var(--nv)}
+.btn-sm{padding:5px 10px;font-size:11px}
+
+/* フォーム */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.form-group{margin-bottom:10px}
+.form-label{font-size:11px;font-weight:500;color:var(--t2);margin-bottom:5px;display:block}
+.form-input,.form-select{width:100%;background:var(--nv-p);border:1px solid var(--bd2);border-radius:7px;color:var(--nv);font-size:13px;padding:8px 10px;outline:none}
+.form-input:focus,.form-select:focus{border-color:var(--nv)}
+
+/* タグ */
+.tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px}
+
+/* 情報行 */
+.info-rows{display:flex;flex-direction:column;gap:0}
+.info-r{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bd)}
+.info-r:last-child{border-bottom:none}
+.info-l{font-size:12px;color:var(--t2)}
+.info-v{font-size:12px;font-weight:500;color:var(--t1)}
+
+/* ローディング */
+.loading{text-align:center;padding:24px;font-size:13px;color:var(--t3)}
+
+/* 通知 */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--nv);color:white;border-radius:8px;padding:10px 16px;font-size:13px;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <img src="icon-192.png" class="header-logo">
+    <div>
+      <span class="header-title">Xtran</span>
+      <span class="header-sub">管理者画面</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <select class="month-select" id="month-sel" onchange="onMonthChange()">
+      <option value="">月を選択</option>
+    </select>
+    <button class="hbtn" onclick="exportCSV()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      CSV出力
+    </button>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sb-section">メニュー</div>
+    <div class="sb-item active" onclick="showPage('dashboard',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      ダッシュボード
+    </div>
+    <div class="sb-item" onclick="showPage('report',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      月次レポート
+    </div>
+    <div class="sb-item" onclick="showPage('employees',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      従業員管理
+    </div>
+    <div class="sb-item" onclick="showPage('correction',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      打刻修正
+    </div>
+    <hr class="sb-divider">
+    <div class="sb-section">従業員</div>
+    <div id="sb-emp-list"></div>
+  </div>
+
+  <div class="content">
+
+    <!-- ダッシュボード -->
+    <div id="page-dashboard" class="page active">
+      <div class="kpi-grid" id="dash-kpi">
+        <div class="kpi"><div class="kpi-label">本日出勤</div><div class="kpi-val" id="k-today">-</div><div class="kpi-note">出勤中</div></div>
+        <div class="kpi"><div class="kpi-label">今月総実労働</div><div class="kpi-val" id="k-work">-</div><div class="kpi-note">休憩除く</div></div>
+        <div class="kpi"><div class="kpi-label">今月総残業</div><div class="kpi-val wa" id="k-ot">-</div><div class="kpi-note">8h超/日</div></div>
+        <div class="kpi"><div class="kpi-label">人件費合計</div><div class="kpi-val sm" id="k-pay">-</div><div class="kpi-note">概算</div></div>
+      </div>
+      <div class="grid2">
+        <div>
+          <div class="section-title">従業員一覧</div>
+          <div class="emp-list" id="dash-emp-list"><div class="loading">読み込み中...</div></div>
+        </div>
+        <div>
+          <div class="section-title">給与内訳 — <span id="dash-pay-name">選択してください</span></div>
+          <div class="pay-block" id="dash-pay-block">
+            <div class="loading">従業員を選択してください</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 月次レポート -->
+    <div id="page-report" class="page">
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px">
+        <div class="kpi"><div class="kpi-label">総実労働時間</div><div class="kpi-val" id="r-work">-</div></div>
+        <div class="kpi"><div class="kpi-label">総残業時間</div><div class="kpi-val wa" id="r-ot">-</div></div>
+        <div class="kpi"><div class="kpi-label">人件費合計</div><div class="kpi-val sm" id="r-pay">-</div></div>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header">
+          <div class="card-title">計算ルール</div>
+        </div>
+        <div class="card-body" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:12px 16px">
+          <div><div style="font-size:10px;color:var(--t3);margin-bottom:3px">休憩控除</div><div style="font-size:13px;font-weight:500;color:var(--nv)">12:00〜13:00 自動 −1h</div></div>
+          <div><div style="font-size:10px;color:var(--t3);margin-bottom:3px">残業割増</div><div style="font-size:13px;font-weight:500;color:var(--nv)">日8h超 × 1.25</div></div>
+          <div><div style="font-size:10px;color:var(--t3);margin-bottom:3px">切り捨て単位</div><div style="font-size:13px;font-weight:500;color:var(--nv)">15分単位</div></div>
+        </div>
+      </div>
+      <div class="section-title">従業員別サマリー</div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr>
+            <th>氏名</th><th>出勤日数</th><th>実労働h</th><th>残業h</th><th>深夜h</th>
+            <th>時給</th><th>残業手当</th><th>深夜手当</th><th>合計支給額</th>
+          </tr></thead>
+          <tbody id="report-tbody"><tr><td colspan="9" class="loading">読み込み中...</td></tr></tbody>
+        </table>
+      </div>
+      <div style="margin-top:16px">
+        <div class="section-title">日別打刻ログ — <span id="log-emp-name">全員</span></div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>日付</th><th>曜日</th><th>出勤</th><th>退勤</th><th>作業場所</th><th>業務内容</th><th>実働(分)</th><th>合計支給</th></tr></thead>
+            <tbody id="log-tbody"><tr><td colspan="8" class="loading">従業員を選択してください</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 従業員管理 -->
+    <div id="page-employees" class="page">
+      <div class="grid2">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div class="section-title" style="margin:0">従業員一覧</div>
+          </div>
+          <div class="emp-list" id="emp-mgmt-list"><div class="loading">読み込み中...</div></div>
+        </div>
+        <div>
+          <div class="section-title">詳細・設定</div>
+          <div class="card" id="emp-detail-card">
+            <div class="card-body">
+              <div class="loading">従業員を選択してください</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 打刻修正 -->
+    <div id="page-correction" class="page">
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header"><div class="card-title">打刻を修正・追加する</div></div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group" style="margin:0">
+              <label class="form-label">従業員</label>
+              <select class="form-select" id="cor-emp"></select>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label class="form-label">日付</label>
+              <input type="date" class="form-input" id="cor-date">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="margin:0">
+              <label class="form-label">出勤時刻</label>
+              <input type="time" class="form-input" id="cor-in">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label class="form-label">退勤時刻</label>
+              <input type="time" class="form-input" id="cor-out">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="margin:0">
+              <label class="form-label">作業場所</label>
+              <select class="form-select" id="cor-loc">
+                <option value="">選択</option>
+                <option>本社</option><option>テレワーク</option><option>客先</option><option>外出</option><option>その他</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label class="form-label">業務内容</label>
+              <input type="text" class="form-input" id="cor-note" placeholder="業務内容を入力">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="submitCorrection()">修正を送信</button>
+        </div>
+      </div>
+      <div class="section-title">最近の打刻ログ</div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>日付</th><th>氏名</th><th>出勤</th><th>退勤</th><th>作業場所</th><th>業務内容</th><th>実働(分)</th><th>合計支給</th></tr></thead>
+          <tbody id="cor-tbody"><tr><td colspan="8" class="loading">読み込み中...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ★ Apps ScriptのURLを入力してください
+const API_URL = 'https://script.google.com/macros/s/AKfycbxAAMDA8tweSwkqB8ccQXrDHQAVt4MY9_Oz5NNxQF7fSdpxAy_95tGz8Ki_POUBKuCT/exec';
+
+let employees  = [];
+let summaryData = [];
+let logsData   = {};
+let selEmpIdx  = 0;
+let currentMonth = '';
+
+// ============================================================
+//  初期化
+// ============================================================
+window.addEventListener('DOMContentLoaded', async () => {
+  buildMonthOptions();
+  await loadEmployees();
+  await loadAll();
+});
+
+function buildMonthOptions() {
+  const sel = document.getElementById('month-sel');
+  const now = new Date();
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const val = `${y}-${m}`;
+    const label = `${y}年${d.getMonth()+1}月`;
+    const opt = document.createElement('option');
+    opt.value = val; opt.textContent = label;
+    if (i === 0) opt.selected = true;
+    sel.appendChild(opt);
+  }
+  currentMonth = sel.value;
+}
+
+async function onMonthChange() {
+  currentMonth = document.getElementById('month-sel').value;
+  await loadAll();
+}
+
+async function loadAll() {
+  await Promise.all([loadSummary(), loadAllLogs()]);
+  refreshDashboard();
+  refreshReport();
+  refreshCorrection();
+}
+
+// ============================================================
+//  データ取得
+// ============================================================
+async function loadEmployees() {
+  try {
+    const res  = await fetch(`${API_URL}?action=getEmployees`);
+    const data = await res.json();
+    if (Array.isArray(data)) {
+      employees = data;
+      buildSbEmps();
+      buildEmpMgmt();
+      buildCorEmpSelect();
+    }
+  } catch(e) { showToast('従業員リストの取得に失敗しました'); }
+}
+
+async function loadSummary() {
+  try {
+    const res  = await fetch(`${API_URL}?action=getSummary&month=${currentMonth}`);
+    const data = await res.json();
+    if (Array.isArray(data)) summaryData = data;
+  } catch(e) {}
+}
+
+async function loadAllLogs() {
+  logsData = {};
+  await Promise.all(employees.map(async e => {
+    try {
+      const period = monthToPeriod(currentMonth);
+      const res  = await fetch(`${API_URL}?action=getLogs&empName=${encodeURIComponent(e.name)}&month=${currentMonth}`);
+      const data = await res.json();
+      if (Array.isArray(data)) logsData[e.name] = data;
+    } catch(ex) {}
+  }));
+}
+
+function monthToPeriod(month) { return month; }
+
+function yen(n) { return '¥' + Math.round(Number(n)||0).toLocaleString(); }
+
+// ============================================================
+//  サイドバー従業員
+// ============================================================
+function buildSbEmps() {
+  document.getElementById('sb-emp-list').innerHTML = employees.map((e,i) =>
+    `<div class="sb-item" onclick="selectEmp(${i},this)" style="font-size:12px">
+      <div class="av" style="width:20px;height:20px;font-size:9px;flex-shrink:0">${e.name.slice(0,2)}</div>
+      ${e.name}
+    </div>`
+  ).join('');
+}
+
+function selectEmp(i, el) {
+  selEmpIdx = i;
+  document.querySelectorAll('#sb-emp-list .sb-item').forEach(e=>e.classList.remove('active'));
+  if(el) el.classList.add('active');
+  refreshDashPayBlock();
+  loadEmpLogs(i);
+  showEmpDetail(i);
+}
+
+// ============================================================
+//  ダッシュボード
+// ============================================================
+function refreshDashboard() {
+  // KPI
+  const totalWork = summaryData.reduce((s,r)=>s+(Number(r.workMin)||0),0);
+  const totalOt   = summaryData.reduce((s,r)=>s+(Number(r.otMin)||0),0);
+  const totalPay  = summaryData.reduce((s,r)=>s+(Number(r.totalPay)||0),0);
+  document.getElementById('k-today').textContent = '- / '+employees.length+'名';
+  document.getElementById('k-work').textContent  = (totalWork/60).toFixed(1)+'h';
+  document.getElementById('k-ot').textContent    = (totalOt/60).toFixed(1)+'h';
+  document.getElementById('k-pay').textContent   = yen(totalPay);
+
+  // 従業員リスト
+  const empData = employees.map(e => {
+    const s = summaryData.find(r => r.name === e.name);
+    return { ...e, workMin: s ? Number(s.workMin)||0 : 0, otMin: s ? Number(s.otMin)||0 : 0, totalPay: s ? Number(s.totalPay)||0 : 0 };
+  });
+
+  document.getElementById('dash-emp-list').innerHTML = empData.map((e,i) =>
+    `<div class="emp-row${i===selEmpIdx?' sel':''}" onclick="selectEmp(${i},null)">
+      <div class="av${i>=3?' lite':''}">${e.name.slice(0,2)}</div>
+      <div class="ei"><div class="en">${e.name}</div><div class="er">${e.role||''}</div></div>
+      <div class="eh">
+        <div class="hh">${(e.workMin/60).toFixed(1)}h</div>
+        <div class="ot">${e.otMin>0?'残業 '+(e.otMin/60).toFixed(1)+'h':''}</div>
+      </div>
+    </div>`
+  ).join('');
+
+  refreshDashPayBlock();
+}
+
+function refreshDashPayBlock() {
+  if (!employees.length) return;
+  const e = employees[selEmpIdx];
+  if (!e) return;
+  document.getElementById('dash-pay-name').textContent = e.name;
+  const s = summaryData.find(r => r.name === e.name);
+  if (!s) {
+    document.getElementById('dash-pay-block').innerHTML = '<div class="loading">データなし</div>';
+    return;
+  }
+  const workH  = (Number(s.workMin)||0) / 60;
+  const otH    = (Number(s.otMin)||0)   / 60;
+  const basePay = Math.round((workH - otH) * (Number(e.wage)||0));
+  const otPay   = Number(s.otPay)    || 0;
+  const nightPay= Number(s.nightPay) || 0;
+  const total   = Number(s.totalPay) || 0;
+  document.getElementById('dash-pay-block').innerHTML = `
+    <div class="pay-block">
+      <div class="pay-row"><span class="pay-label">基本給（${workH.toFixed(1)}h × ¥${Number(e.wage).toLocaleString()}）</span><span class="pay-val">${yen(basePay)}</span></div>
+      <div class="pay-row"><span class="pay-label">残業手当</span><span class="pay-val">${yen(otPay)}</span></div>
+      <div class="pay-row"><span class="pay-label">深夜手当</span><span class="pay-val">${yen(nightPay)}</span></div>
+      <div class="pay-row total"><span class="pay-label">合計支給額</span><span class="pay-val">${yen(total)}</span></div>
+    </div>`;
+}
+
+// ============================================================
+//  月次レポート
+// ============================================================
+function refreshReport() {
+  const totalWork = summaryData.reduce((s,r)=>s+(Number(r.workMin)||0),0);
+  const totalOt   = summaryData.reduce((s,r)=>s+(Number(r.otMin)||0),0);
+  const totalPay  = summaryData.reduce((s,r)=>s+(Number(r.totalPay)||0),0);
+  document.getElementById('r-work').textContent = (totalWork/60).toFixed(1)+'h';
+  document.getElementById('r-ot').textContent   = (totalOt/60).toFixed(1)+'h';
+  document.getElementById('r-pay').textContent  = yen(totalPay);
+
+  document.getElementById('report-tbody').innerHTML = employees.map(e => {
+    const s = summaryData.find(r => r.name === e.name);
+    if (!s) return `<tr><td>${e.name}</td><td colspan="8" style="color:var(--t3)">データなし</td></tr>`;
+    return `<tr>
+      <td>${e.name}</td>
+      <td>${s.days||0}</td>
+      <td>${((Number(s.workMin)||0)/60).toFixed(1)}h</td>
+      <td class="wa">${((Number(s.otMin)||0)/60).toFixed(1)}h</td>
+      <td class="ng">${((Number(s.nightMin)||0)/60).toFixed(1)}h</td>
+      <td>¥${Number(e.wage).toLocaleString()}</td>
+      <td>${yen(s.otPay)}</td>
+      <td>${yen(s.nightPay)}</td>
+      <td class="hi">${yen(s.totalPay)}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function loadEmpLogs(i) {
+  const e = employees[i];
+  if (!e) return;
+  document.getElementById('log-emp-name').textContent = e.name;
+  const logs = logsData[e.name] || [];
+  if (!logs.length) {
+    document.getElementById('log-tbody').innerHTML = '<tr><td colspan="8" class="loading">データなし</td></tr>';
+    return;
+  }
+  document.getElementById('log-tbody').innerHTML = logs.map(l => `<tr>
+    <td>${l.date}</td>
+    <td>${l.day||''}</td>
+    <td class="ok">${l.timeIn||'-'}</td>
+    <td class="ng">${l.timeOut||'-'}</td>
+    <td>${l.location||'-'}</td>
+    <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.note||'-'}</td>
+    <td>${l.workMin||0}</td>
+    <td class="hi">${yen(l.totalPay)}</td>
+  </tr>`).join('');
+}
+
+// ============================================================
+//  従業員管理
+// ============================================================
+function buildEmpMgmt() {
+  document.getElementById('emp-mgmt-list').innerHTML = employees.map((e,i) =>
+    `<div class="emp-row" onclick="showEmpDetail(${i},this)">
+      <div class="av${i>=3?' lite':''}">${e.name.slice(0,2)}</div>
+      <div class="ei"><div class="en">${e.name}</div><div class="er">${e.role||''}</div></div>
+      <span class="tag badge-ok">在籍中</span>
+    </div>`
+  ).join('');
+}
+
+function showEmpDetail(i, el) {
+  if (el) {
+    document.querySelectorAll('#emp-mgmt-list .emp-row').forEach(r=>r.classList.remove('sel'));
+    el.classList.add('sel');
+  }
+  const e = employees[i];
+  if (!e) return;
+  const s = summaryData.find(r => r.name === e.name);
+  document.getElementById('emp-detail-card').innerHTML = `
+    <div class="card-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="av${i>=3?' lite':''}" style="width:38px;height:38px;font-size:13px">${e.name.slice(0,2)}</div>
+        <div><div style="font-size:15px;font-weight:500;color:var(--t1)">${e.name}</div><div style="font-size:12px;color:var(--t3)">${e.role||''}</div></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="info-rows" style="margin-bottom:14px">
+        <div class="info-r"><span class="info-l">時給</span><span class="info-v">¥${Number(e.wage).toLocaleString()}</span></div>
+        <div class="info-r"><span class="info-l">今月出勤日数</span><span class="info-v">${s ? s.days||0 : 0}日</span></div>
+        <div class="info-r"><span class="info-l">今月実労働時間</span><span class="info-v">${s ? ((Number(s.workMin)||0)/60).toFixed(1)+'h' : '-'}</span></div>
+        <div class="info-r"><span class="info-l">今月残業時間</span><span class="info-v" style="color:var(--wa)">${s ? ((Number(s.otMin)||0)/60).toFixed(1)+'h' : '-'}</span></div>
+        <div class="info-r"><span class="info-l">今月概算給与</span><span class="info-v" style="color:var(--nv)">${s ? yen(s.totalPay) : '-'}</span></div>
+      </div>
+      <div style="margin-bottom:10px">
+        <label class="form-label">時給を変更</label>
+        <div style="display:flex;gap:8px">
+          <input type="number" class="form-input" id="wage-input-${i}" value="${e.wage}" min="900" step="100" style="max-width:120px">
+          <button class="btn btn-primary btn-sm" onclick="updateWage(${i})">更新</button>
+        </div>
+      </div>
+      <div>
+        <label class="form-label">PINリセット</label>
+        <button class="btn btn-ghost btn-sm" onclick="resetPin('${e.name}')">PINをリセット</button>
+      </div>
+    </div>`;
+}
+
+async function updateWage(i) {
+  const e    = employees[i];
+  const wage = document.getElementById(`wage-input-${i}`).value;
+  if (!wage || wage < 900) { showToast('時給は900円以上で入力してください'); return; }
+  showToast('更新中...');
+  // スプレッドシートのマスタを直接編集するよう案内
+  showToast(`${e.name}の時給を¥${Number(wage).toLocaleString()}に変更しました（スプレッドシートのマスタも更新してください）`);
+  employees[i].wage = Number(wage);
+}
+
+async function resetPin(empName) {
+  if (!confirm(`${empName}のPINをリセットしますか？次回ログイン時に再設定が必要になります。`)) return;
+  try {
+    const res  = await fetch(`${API_URL}?action=registerPin&empName=${encodeURIComponent(empName)}&pin=`);
+    const data = await res.json();
+    showToast(data.success ? `${empName}のPINをリセットしました` : 'リセットに失敗しました');
+  } catch(e) { showToast('通信エラーが発生しました'); }
+}
+
+// ============================================================
+//  打刻修正
+// ============================================================
+function buildCorEmpSelect() {
+  document.getElementById('cor-emp').innerHTML = employees.map(e =>
+    `<option value="${e.name}">${e.name}</option>`
+  ).join('');
+  const now = new Date();
+  document.getElementById('cor-date').value =
+    `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+}
+
+function refreshCorrection() {
+  const allLogs = [];
+  Object.entries(logsData).forEach(([name, logs]) => {
+    logs.forEach(l => allLogs.push({...l, empName: name}));
+  });
+  allLogs.sort((a,b) => String(b.date).localeCompare(String(a.date)));
+  const recent = allLogs.slice(0, 20);
+  if (!recent.length) {
+    document.getElementById('cor-tbody').innerHTML = '<tr><td colspan="8" class="loading">データなし</td></tr>';
+    return;
+  }
+  document.getElementById('cor-tbody').innerHTML = recent.map(l => `<tr>
+    <td>${l.date}</td>
+    <td>${l.empName}</td>
+    <td class="ok">${l.timeIn||'-'}</td>
+    <td class="ng">${l.timeOut||'-'}</td>
+    <td>${l.location||'-'}</td>
+    <td style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.note||'-'}</td>
+    <td>${l.workMin||0}</td>
+    <td class="hi">${yen(l.totalPay)}</td>
+  </tr>`).join('');
+}
+
+async function submitCorrection() {
+  const empName = document.getElementById('cor-emp').value;
+  const dateVal = document.getElementById('cor-date').value;
+  const inVal   = document.getElementById('cor-in').value;
+  const outVal  = document.getElementById('cor-out').value;
+  const loc     = document.getElementById('cor-loc').value;
+  const note    = document.getElementById('cor-note').value.trim();
+
+  if (!empName) { showToast('従業員を選択してください'); return; }
+  if (!dateVal) { showToast('日付を入力してください'); return; }
+  if (!inVal && !outVal) { showToast('出勤か退勤の時刻を入力してください'); return; }
+
+  const parts   = dateVal.split('-');
+  const dateStr = `${parts[0]}/${parts[1]}/${parts[2]}`;
+  const wd      = ['日','月','火','水','木','金','土'];
+  const dayStr  = wd[new Date(dateVal).getDay()];
+
+  try {
+    showToast('送信中...');
+    const body = { userName: empName, date: dateStr, day: dayStr, timeIn: inVal, timeOut: outVal, location: loc, note: note, workMinutes: 0, fixed: true };
+    const res  = await fetch(API_URL, { method: 'POST', body: JSON.stringify(body) });
+    const text = await res.text();
+    if (text === 'ok') {
+      showToast('打刻を修正しました！');
+      await loadAll();
+    } else { showToast('送信に失敗しました'); }
+  } catch(e) { showToast('通信エラーが発生しました'); }
+}
+
+// ============================================================
+//  CSV出力
+// ============================================================
+function exportCSV() {
+  const h = ['氏名','出勤日数','実労働h','残業h','深夜h','時給','残業手当','深夜手当','合計支給額'];
+  const rows = employees.map(e => {
+    const s = summaryData.find(r => r.name === e.name);
+    if (!s) return [e.name,0,0,0,0,e.wage,0,0,0];
+    return [e.name, s.days||0, ((Number(s.workMin)||0)/60).toFixed(1), ((Number(s.otMin)||0)/60).toFixed(1),
+            ((Number(s.nightMin)||0)/60).toFixed(1), e.wage, s.otPay||0, s.nightPay||0, s.totalPay||0];
+  });
+  const csv = [h,...rows].map(r=>r.join(',')).join('\n');
+  const a   = document.createElement('a');
+  a.href    = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
+  const m   = currentMonth || 'report';
+  a.download = `Xtran_勤怠_${m}.csv`;
+  a.click();
+  showToast('CSVを出力しました！');
+}
+
+// ============================================================
+//  ページ切替
+// ============================================================
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+// ============================================================
+//  トースト
+// ============================================================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
