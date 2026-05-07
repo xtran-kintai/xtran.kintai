@@ -497,7 +497,15 @@ function refreshDashboard() {
   const totalWork = summaryData.reduce((s,r)=>s+(Number(r.workMin)||0),0);
   const totalOt   = summaryData.reduce((s,r)=>s+(Number(r.otMin)||0),0);
   const totalPay  = summaryData.reduce((s,r)=>s+(Number(r.totalPay)||0),0);
-  document.getElementById('k-today').textContent = '- / '+employees.length+'名';
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,'0')}/${String(today.getDate()).padStart(2,'0')}`;
+  let attendCount = 0;
+  employees.forEach(e => {
+    const logs = logsData[e.name] || [];
+    const todayLog = logs.find(l => String(l.date) === todayStr);
+    if (todayLog && todayLog.timeIn && String(todayLog.timeIn).trim() !== '') attendCount++;
+  });
+  document.getElementById('k-today').textContent = attendCount + ' / ' + employees.length + '名';
   document.getElementById('k-work').textContent  = (totalWork/60).toFixed(1)+'h';
   document.getElementById('k-ot').textContent    = (totalOt/60).toFixed(1)+'h';
   document.getElementById('k-pay').textContent   = yen(totalPay);
