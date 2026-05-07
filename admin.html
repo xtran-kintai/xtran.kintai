@@ -503,7 +503,7 @@ function refreshDashboard() {
   employees.forEach(e => {
     const logs = logsData[e.name] || [];
     const todayLog = logs.find(l => String(l.date) === todayStr);
-    if (todayLog && todayLog.timeIn && String(todayLog.timeIn).trim() !== '') attendCount++;
+    if (todayLog && todayLog.timeIn && String(todayLog.timeIn).trim() !== '' && (!todayLog.timeOut || String(todayLog.timeOut).trim() === '')) attendCount++;
   });
   document.getElementById('k-today').textContent = attendCount + ' / ' + employees.length + '名';
   document.getElementById('k-work').textContent  = (totalWork/60).toFixed(1)+'h';
