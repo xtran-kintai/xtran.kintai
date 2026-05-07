@@ -71,8 +71,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .submit-btn:active{opacity:0.85}
 .cancel-link{display:block;text-align:center;margin-top:12px;font-size:13px;color:var(--t3);cursor:pointer}
 .correction-note{background:rgba(217,119,6,0.08);border:1px solid rgba(217,119,6,0.2);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--wa);margin-bottom:12px;line-height:1.5;display:none}
-
-/* PINパッド */
 .pin-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;align-items:flex-end}
 .pin-overlay.show{display:flex}
 .pin-modal{background:white;border-radius:16px 16px 0 0;width:100%;padding:20px 16px;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
@@ -90,7 +88,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .pin-key.empty{background:transparent;cursor:default}
 .pin-error{color:var(--ng);font-size:12px;text-align:center;margin-top:8px;min-height:18px}
 .pin-cancel{display:block;text-align:center;margin-top:14px;font-size:13px;color:var(--t3);cursor:pointer}
-
 .tab-bar{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--bd);display:flex;padding-bottom:env(safe-area-inset-bottom)}
 .tab-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0 10px;cursor:pointer;gap:3px;color:var(--t3);transition:color 0.15s}
 .tab-item svg{width:22px;height:22px}
@@ -132,7 +129,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
       <div id="log-body"><div class="log-empty">まだ打刻がありません</div></div>
     </div>
   </div>
-
   <div id="pg-record" style="display:none">
     <div class="kpi-grid" id="kpi-grid"><div class="loading">読み込み中...</div></div>
     <div class="section-title">週別実労働時間</div>
@@ -141,7 +137,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
   <div class="pb-space"></div>
 </div>
 
-<!-- 従業員選択モーダル -->
 <div class="overlay" id="overlay" onclick="closeEmpModal()">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-title">従業員を選択してください</div>
@@ -149,7 +144,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
   </div>
 </div>
 
-<!-- PIN入力モーダル -->
 <div class="pin-overlay" id="pin-overlay">
   <div class="pin-modal">
     <div class="pin-title" id="pin-title">PIN認証</div>
@@ -180,7 +174,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
   </div>
 </div>
 
-<!-- 打刻モーダル -->
 <div class="punch-overlay" id="punch-overlay">
   <div class="punch-modal">
     <div class="punch-modal-title" id="punch-modal-title">出勤打刻</div>
@@ -218,7 +211,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
   </div>
 </div>
 
-<!-- ボトムタブ -->
 <div class="tab-bar">
   <div class="tab-item active" id="tab-punch" onclick="showPg('punch')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -246,16 +238,12 @@ let punchLogs   = [];
 let punchState  = 'none';
 let currentType = '出勤';
 let pinBuffer   = '';
-let pinMode     = ''; // 'verify' | 'register' | 'confirm'
-let pinFirst    = ''; // 初回登録時の1回目PIN
+let pinMode     = '';
+let pinFirst    = '';
 
-// ============================================================
-//  初期化
-// ============================================================
 window.addEventListener('DOMContentLoaded', async () => {
   tickClock();
   setInterval(tickClock, 1000);
-  // 5分ごとに今日のログを再取得して状態を復元
   setInterval(async () => {
     if (currentEmp) await loadTodayLogs();
   }, 5 * 60 * 1000);
@@ -279,9 +267,6 @@ function tickClock() {
     h < 10 ? 'おはようございます' : h < 17 ? 'こんにちは' : 'お疲れ様です';
 }
 
-// ============================================================
-//  従業員リスト
-// ============================================================
 async function loadEmployees() {
   try {
     const res = await fetch(`${API_URL}?action=getEmployees`);
@@ -295,7 +280,6 @@ async function loadEmployees() {
       if (!found) currentEmp = null;
     }
     if (!currentEmp && employees.length > 0) {
-      // デフォルト選択はせずPIN認証を促す
       updateEmpDisplay();
     }
   } catch(e) {
@@ -318,13 +302,10 @@ function buildEmpModal() {
 function openEmpModal()  { document.getElementById('overlay').classList.add('show'); }
 function closeEmpModal() { document.getElementById('overlay').classList.remove('show'); }
 
-// 従業員選択 → PIN認証へ
 async function selectEmpAndPin(name) {
   closeEmpModal();
   const emp = employees.find(e => e.name === name);
   if (!emp) return;
-
-  // PIN設定済みか確認
   try {
     const res  = await fetch(`${API_URL}?action=hasPin&empName=${encodeURIComponent(name)}`);
     const data = await res.json();
@@ -342,9 +323,6 @@ function updateEmpDisplay() {
   document.getElementById('emp-badge').textContent = currentEmp ? currentEmp.name : '従業員を選択';
 }
 
-// ============================================================
-//  PIN認証
-// ============================================================
 function openPinModal(mode, emp) {
   pinMode   = mode;
   pinBuffer = '';
@@ -353,7 +331,6 @@ function openPinModal(mode, emp) {
   document.getElementById('pin-error').textContent = '';
   document.getElementById('pin-emp').textContent   = emp.name;
   document.getElementById('pin-cancel').style.display = 'block';
-
   if (mode === 'register') {
     document.getElementById('pin-title').textContent = '初回PIN設定';
     document.getElementById('pin-sub').textContent   = '好きな4桁のPINコードを設定してください';
@@ -361,8 +338,6 @@ function openPinModal(mode, emp) {
     document.getElementById('pin-title').textContent = 'PIN認証';
     document.getElementById('pin-sub').textContent   = '4桁のPINコードを入力してください';
   }
-
-  // 仮の従業員をセット（認証前）
   window._pendingEmp = emp;
   document.getElementById('pin-overlay').classList.add('show');
 }
@@ -402,18 +377,14 @@ function updatePinDots(state) {
 async function processPinComplete() {
   const emp = window._pendingEmp;
   if (!emp) return;
-
   if (pinMode === 'register') {
-    // 初回設定：1回目
     pinFirst  = pinBuffer;
     pinBuffer = '';
     updatePinDots();
     document.getElementById('pin-title').textContent = 'PIN確認';
     document.getElementById('pin-sub').textContent   = 'もう一度同じPINを入力してください';
     pinMode = 'confirm';
-
   } else if (pinMode === 'confirm') {
-    // 初回設定：確認入力
     if (pinBuffer !== pinFirst) {
       document.getElementById('pin-error').textContent = 'PINが一致しません。最初からやり直してください。';
       updatePinDots('error');
@@ -428,7 +399,6 @@ async function processPinComplete() {
       }, 1500);
       return;
     }
-    // PINを保存
     try {
       const res  = await fetch(`${API_URL}?action=registerPin&empName=${encodeURIComponent(emp.name)}&pin=${pinBuffer}`);
       const data = await res.json();
@@ -440,9 +410,7 @@ async function processPinComplete() {
     } catch(e) {
       document.getElementById('pin-error').textContent = '通信エラーが発生しました。';
     }
-
   } else if (pinMode === 'verify') {
-    // 認証
     try {
       const res  = await fetch(`${API_URL}?action=verifyPin&empName=${encodeURIComponent(emp.name)}&pin=${pinBuffer}`);
       const data = await res.json();
@@ -467,7 +435,6 @@ function pinSuccess(emp) {
   document.getElementById('pin-overlay').classList.remove('show');
   currentEmp = emp;
   localStorage.setItem('xtran_emp', JSON.stringify(currentEmp));
-  // 当日認証済みとしてlocalStorageに保存
   const today = new Date().toISOString().slice(0, 10);
   localStorage.setItem('xtran_pin_date_' + emp.name, today);
   updateEmpDisplay();
@@ -479,17 +446,6 @@ function pinSuccess(emp) {
   showNotice('ログインしました。', 'ok');
 }
 
-// ============================================================
-//  打刻モーダル
-// ============================================================
-function openPunchModal(type) {
-  if (!currentEmp) { showNotice('従業員を選択してください', 'err'); return; }
-  if (type === '出勤' && punchState === 'in') {
-    showNotice('すでに出勤打刻済みです', 'err'); return;
-  }
-  if (type === '退勤' && punchState === 'none') {
-  showNotice('出勤打刻をしてから退勤してください', 'err'); return;
-}
 function openPunchModal(type) {
   if (!currentEmp) { showNotice('従業員を選択してください', 'err'); return; }
   if (type === '出勤' && punchState === 'in') {
@@ -528,9 +484,6 @@ function checkCorrectionMode() {
   document.getElementById('correction-note').style.display = selected !== todayStr ? 'block' : 'none';
 }
 
-// ============================================================
-//  打刻送信
-// ============================================================
 async function submitPunch() {
   const dateVal = document.getElementById('punch-date').value;
   const timeVal = document.getElementById('punch-time').value;
@@ -551,11 +504,12 @@ async function submitPunch() {
   }
 
   // 退勤で今日の日付かつ出勤中でない場合は送信不可
-const todayCheck = `${new Date().getFullYear()}/${String(new Date().getMonth()+1).padStart(2,'0')}/${String(new Date().getDate()).padStart(2,'0')}`;
-if (currentType === '退勤' && dateStr === todayCheck && punchState !== 'in') {
-  alert('今日の退勤は出勤打刻後にしてください。過去の修正は日付を変更してください。');
-  return;
-}
+  const todayCheck = `${new Date().getFullYear()}/${String(new Date().getMonth()+1).padStart(2,'0')}/${String(new Date().getDate()).padStart(2,'0')}`;
+  if (currentType === '退勤' && dateStr === todayCheck && punchState !== 'in') {
+    alert('今日の退勤は出勤打刻後にしてください。過去の修正は日付を変更してください。');
+    return;
+  }
+
   closePunchModal();
   punchLogs.unshift({ type: currentType, time: timeVal, state: '送信中' });
   renderLogs();
@@ -585,14 +539,10 @@ if (currentType === '退勤' && dateStr === todayCheck && punchState !== 'in') {
   }
 }
 
-// ============================================================
-//  今日のログ取得
-// ============================================================
 async function loadTodayLogs() {
   if (!currentEmp) return;
   const today    = new Date();
   const month    = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
-  const todayStr = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,'0')}/${String(today.getDate()).padStart(2,'0')}`;
   try {
     const res  = await fetch(`${API_URL}?action=getLogs&empName=${encodeURIComponent(currentEmp.name)}&month=${month}`);
     if (!res.ok) return;
@@ -605,28 +555,26 @@ async function loadTodayLogs() {
       const jy = dJST.getUTCFullYear();
       const jm = String(dJST.getUTCMonth()+1).padStart(2,'0');
       const jd = String(dJST.getUTCDate()).padStart(2,'0');
-      const today = new Date();
-      return jy === today.getFullYear() &&
-         jm === String(today.getMonth()+1).padStart(2,'0') &&
-         jd === String(today.getDate()).padStart(2,'0');
-});
+      const now = new Date();
+      return jy === now.getFullYear() &&
+             jm === String(now.getMonth()+1).padStart(2,'0') &&
+             jd === String(now.getDate()).padStart(2,'0');
+    });
     punchLogs = [];
     todays.forEach(l => {
       const formatTime = (t) => {
-  if (!t) return '';
-  const str = String(t);
-  // HH:mm形式ならそのまま
-  if (/^\d{2}:\d{2}/.test(str)) return str.slice(0,5);
-  // Date形式の場合はJST変換
-  const d = new Date(t);
-  if (!isNaN(d)) {
-    const jst = new Date(d.getTime() + 9*60*60*1000);
-    return String(jst.getUTCHours()).padStart(2,'0') + ':' + String(jst.getUTCMinutes()).padStart(2,'0');
-  }
-  return str.slice(0,5);
+        if (!t) return '';
+        const str = String(t);
+        if (/^\d{2}:\d{2}/.test(str)) return str.slice(0,5);
+        const d = new Date(t);
+        if (!isNaN(d)) {
+          const jst = new Date(d.getTime() + 9*60*60*1000);
+          return String(jst.getUTCHours()).padStart(2,'0') + ':' + String(jst.getUTCMinutes()).padStart(2,'0');
+        }
+        return str.slice(0,5);
       };
-const inT  = formatTime(l.timeIn);
-const outT = formatTime(l.timeOut);
+      const inT  = formatTime(l.timeIn);
+      const outT = formatTime(l.timeOut);
       if (inT)  punchLogs.push({ type:'出勤', time: inT,  state:'記録済' });
       if (outT) punchLogs.push({ type:'退勤', time: outT, state:'記録済' });
     });
@@ -640,9 +588,6 @@ const outT = formatTime(l.timeOut);
   } catch(e) {}
 }
 
-// ============================================================
-//  UI
-// ============================================================
 function renderLogs() {
   const el = document.getElementById('log-body');
   if (!punchLogs.length) { el.innerHTML = '<div class="log-empty">まだ打刻がありません</div>'; return; }
