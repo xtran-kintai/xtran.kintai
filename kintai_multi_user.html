@@ -488,8 +488,23 @@ function openPunchModal(type) {
     showNotice('すでに出勤打刻済みです', 'err'); return;
   }
   if (type === '退勤' && punchState !== 'in') {
-    showNotice('出勤打刻をしてから退勤してください', 'err'); return;
-  }
+  // 過去日付修正用にモーダルは開くが、今日の日付のままでは送信不可
+  currentType = type;
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  document.getElementById('punch-date').value = dateStr;
+  document.getElementById('punch-time').value = timeStr;
+  document.getElementById('punch-modal-title').textContent = '退勤打刻（過去修正）';
+  document.getElementById('punch-submit-btn').textContent = '退勤する';
+  document.getElementById('correction-note').style.display = 'block';
+  document.getElementById('checkout-fields').style.display = 'block';
+  document.getElementById('location-select').value = '';
+  document.getElementById('note-input').value = '';
+  document.getElementById('punch-overlay').classList.add('show');
+  return;
+}
+}
 
   currentType = type;
   const now     = new Date();
@@ -542,6 +557,12 @@ async function submitPunch() {
     if (!note)     { alert('業務内容を入力してください'); return; }
   }
 
+  // 退勤で今日の日付かつ出勤中でない場合は送信不可
+const todayCheck = `${new Date().getFullYear()}/${String(new Date().getMonth()+1).padStart(2,'0')}/${String(new Date().getDate()).padStart(2,'0')}`;
+if (currentType === '退勤' && dateStr === todayCheck && punchState !== 'in') {
+  alert('今日の退勤は出勤打刻後にしてください。過去の修正は日付を変更してください。');
+  return;
+}
   closePunchModal();
   punchLogs.unshift({ type: currentType, time: timeVal, state: '送信中' });
   renderLogs();
