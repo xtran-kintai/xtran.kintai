@@ -487,7 +487,10 @@ function openPunchModal(type) {
   if (type === '出勤' && punchState === 'in') {
     showNotice('すでに出勤打刻済みです', 'err'); return;
   }
-  if (type === '退勤' && punchState !== 'in') {
+  if (type === '退勤' && punchState === 'none') {
+  showNotice('出勤打刻をしてから退勤してください', 'err'); return;
+}
+if (type === '退勤' && punchState === 'out') {
   // 過去日付修正用にモーダルは開くが、今日の日付のままでは送信不可
   currentType = type;
   const now = new Date();
